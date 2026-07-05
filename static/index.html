@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MemoDrop - AI Memory Assistant</title>
+    <!-- Google Fonts: League Spartan (Headlines) & Inter (Body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=League+Spartan:wght@700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <!-- Main App Layout Shell -->
+    <div class="app-layout">
+        
+        <!-- SIDEBAR: Slim Icon Navigation -->
+        <aside class="app-sidebar">
+            <div class="sidebar-logo">
+                <i class="fa-solid fa-brain"></i>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" id="nav-chat-btn" title="Chat Interface">
+                    <i class="fa-solid fa-message"></i>
+                    <span>Chat</span>
+                </button>
+                <button class="nav-item" id="nav-vault-btn" title="Memory Vault">
+                    <i class="fa-solid fa-vault"></i>
+                    <span>Vault</span>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="nav-item-icon" title="Settings"><i class="fa-solid fa-sliders"></i></button>
+            </div>
+        </aside>
+
+        <!-- MAIN VIEW CONTAINER -->
+        <div class="app-view-container">
+            
+            <!-- TOP BAR: Navigation and Mode Toggle -->
+            <header class="app-topbar">
+                <div class="topbar-left">
+                    <div class="topbar-logo-chip" style="width: 32px; height: 32px; background-color: #ffffff; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #111318; font-size: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-right: 0.5rem; flex-shrink: 0;">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <span class="topbar-logo-wordmark" style="color: var(--text-primary); font-family: 'League Spartan', sans-serif; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em;">MemoDrop</span>
+                </div>
+                
+                <div class="topbar-right">
+                    <button class="nav-item-icon" title="Menu" style="color: var(--text-secondary); background: transparent; border: none; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; transition: color 0.15s, background-color 0.15s;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- VIEW A: CHAT APPLICATION SCREEN -->
+            <section class="app-view active" id="view-chat">
+                <!-- Floating Doodle Accents in Chat Empty Spaces (Never overlapping content) -->
+                <div class="chat-doodles">
+                    <svg class="doodle-svg squiggle" width="50" height="15" viewBox="0 0 50 15" fill="none">
+                        <path d="M4 11C12 3 16 13 24 7C32 1 36 11 44 5" stroke="#111111" stroke-width="2.5" stroke-linecap="round"/>
+                    </svg>
+                    <svg class="doodle-svg star" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2V22M2 12H22M5.5 5.5L18.5 18.5M5.5 18.5L18.5 5.5" stroke="#111111" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+
+                <!-- Due Reminders Banner Container -->
+                <div id="due-reminders-banner-container" style="display: none; padding: 0.5rem 1.5rem 0.25rem 1.5rem; flex-shrink: 0; z-index: 5;"></div>
+
+                <!-- Chat Messages Scroll Area -->
+                <div class="chat-message-thread" id="chat-messages-thread">
+                    <!-- Rendered dynamically from JS state array -->
+                </div>
+
+                <!-- COMPOSER BAR (Pinned to bottom of Chat Screen) -->
+                <div class="chat-composer-section" style="position: relative;">
+                    <!-- Quick Actions Popover Grid -->
+                    <div class="composer-actions-popover" id="composer-actions-popover" style="display: none; position: absolute; bottom: 85px; left: 1.5rem; right: 1.5rem; background-color: var(--bg-card); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35); padding: 0.85rem; z-index: 10; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; animation: slideUp 0.18s ease-out;">
+                        <button type="button" class="popover-action-btn" data-action="gallery" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                            <i class="fa-solid fa-image" style="color: #60a5fa; font-size: 1.2rem;"></i>
+                            <span style="font-size: 0.72rem; font-weight: 500;">Gallery</span>
+                        </button>
+                        <button type="button" class="popover-action-btn" data-action="camera" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                            <i class="fa-solid fa-camera" style="color: #f87171; font-size: 1.2rem;"></i>
+                            <span style="font-size: 0.72rem; font-weight: 500;">Camera</span>
+                        </button>
+                        <button type="button" class="popover-action-btn" data-action="document" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                            <i class="fa-solid fa-file-pdf" style="color: #fb923c; font-size: 1.2rem;"></i>
+                            <span style="font-size: 0.72rem; font-weight: 500;">Document</span>
+                        </button>
+                        <button type="button" class="popover-action-btn" data-action="contact" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                            <i class="fa-solid fa-address-book" style="color: #34d399; font-size: 1.2rem;"></i>
+                            <span style="font-size: 0.72rem; font-weight: 500;">Contact</span>
+                        </button>
+                        <button type="button" class="popover-action-btn" data-action="location" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                            <i class="fa-solid fa-map-pin" style="color: #a78bfa; font-size: 1.2rem;"></i>
+                            <span style="font-size: 0.72rem; font-weight: 500;">Location</span>
+                        </button>
+                        <button type="button" class="popover-action-btn" data-action="savelink" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                            <i class="fa-solid fa-link" style="color: #22d3ee; font-size: 1.2rem;"></i>
+                            <span style="font-size: 0.72rem; font-weight: 500;">Save Link</span>
+                        </button>
+                        <button type="button" class="popover-action-btn" data-action="reminder" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                            <i class="fa-solid fa-calendar-check" style="color: #fbbf24; font-size: 1.2rem;"></i>
+                            <span style="font-size: 0.72rem; font-weight: 500;">Reminder</span>
+                        </button>
+                        <button type="button" class="popover-action-btn" data-action="business_quote" id="action-business-quote-btn" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                            <i class="fa-solid fa-file-invoice-dollar" style="color: #f472b6; font-size: 1.2rem;"></i>
+                            <span style="font-size: 0.72rem; font-weight: 500;">Biz Quote</span>
+                        </button>
+                    </div>
+
+                    <!-- Collapsible Processing Explainer -->
+                    <div class="explainer-panel-wrapper">
+                        <button class="explainer-toggle-btn" id="explainer-toggle-btn">
+                            <span>How MemoDrop organizes this</span>
+                            <i class="fa-solid fa-chevron-up toggle-icon"></i>
+                        </button>
+                        
+                        <div class="explainer-content-box" id="explainer-content-box">
+                            <div class="explainer-steps">
+                                <div class="exp-step">
+                                    <div class="num">1</div>
+                                    <div class="text"><strong>Classify</strong>: Auto-routes message to categories (e.g. quote, complaint, link)</div>
+                                </div>
+                                <div class="exp-step">
+                                    <div class="num">2</div>
+                                    <div class="text"><strong>Tag & Extract</strong>: Pulls prices, contacts, and auto-tags keywords</div>
+                                </div>
+                                <div class="exp-step">
+                                    <div class="num">3</div>
+                                    <div class="text"><strong>Recall</strong>: Matches queries semantically, serving the source in context</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Segmented Control Group for Personal/Business (Relocated) -->
+                    <div style="display: flex; justify-content: center; width: 100%; margin-bottom: 0.5rem; margin-top: 0.15rem;">
+                        <div class="segmented-control" id="mode-segmented-control">
+                            <!-- Hidden checkbox for state tracking -->
+                            <input type="checkbox" id="mode-toggle-checkbox" style="display: none;">
+                            <div class="segmented-slider"></div>
+                            <button class="segment-btn active" id="segment-btn-personal" type="button">Personal</button>
+                            <button class="segment-btn" id="segment-btn-business" type="button">Business</button>
+                        </div>
+                    </div>
+
+                    <!-- Pinned Input Composer -->
+                    <div class="composer-input-bar" style="display: flex; flex-direction: column; padding: 0.75rem 0.9rem; gap: 0.6rem;">
+                        <input type="text" id="chat-input" placeholder="Ask me anything or drop something to save..." autocomplete="off">
+                        <div class="composer-actions-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <div class="composer-left-actions" style="display: flex; gap: 0.65rem; align-items: center; color: var(--text-secondary);">
+                                <button type="button" class="composer-icon-btn" id="composer-plus-btn" title="Quick Actions"><i class="fa-solid fa-plus"></i></button>
+                                <button type="button" class="composer-icon-btn" id="composer-voice-btn" title="Voice note"><i class="fa-solid fa-microphone"></i></button>
+                                
+                                <div class="composer-mode-toggle" id="composer-mode-toggle" style="display: flex; align-items: center; gap: 0.35rem; background-color: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 0.25rem 0.55rem; cursor: pointer; user-select: none; transition: all 0.2s;">
+                                    <i class="fa-solid fa-inbox" id="composer-mode-icon" style="color: var(--accent-color); font-size: 0.78rem;"></i>
+                                    <span id="composer-mode-label" style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-primary);">Save Mode</span>
+                                </div>
+                            </div>
+                            <button id="chat-send-btn" type="button"><i class="fa-solid fa-arrow-up"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW B: MEMORY VAULT SCREEN -->
+            <section class="app-view" id="view-vault">
+                <div class="vault-wrapper">
+                    <!-- Title Bar -->
+                    <div class="vault-title-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; width: 100%;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <h2 class="vault-heading" style="margin: 0;">Stored Memories</h2>
+                            <span class="vault-count" id="memory-count" style="margin: 0; font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">0 items saved</span>
+                        </div>
+                        
+                        <!-- Segmented Control Group for Personal/Business (Vault Copy) -->
+                        <div class="segmented-control" id="vault-mode-segmented-control">
+                            <div class="segmented-slider"></div>
+                            <button class="segment-btn active" id="vault-segment-btn-personal" type="button">Personal</button>
+                            <button class="segment-btn" id="vault-segment-btn-business" type="button">Business</button>
+                        </div>
+                    </div>
+
+                    <!-- Search and Filters Box -->
+                    <div class="vault-controls">
+                        <div class="vault-search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="vault-search-input" placeholder="Search saved items...">
+                            <button id="vault-search-btn">Search</button>
+                        </div>
+                        
+                        <!-- Category Filter Pills -->
+                        <div class="vault-tabs">
+                            <button class="tab-btn active" data-category="All">All</button>
+                            <button class="tab-btn" data-category="business_supplier_quote">Quotes</button>
+                            <button class="tab-btn" data-category="business_customer_complaint">Complaints</button>
+                            <button class="tab-btn" data-category="shopping_link">Links</button>
+                            <button class="tab-btn" data-category="task_reminder">Reminders</button>
+                            <button class="tab-btn" data-category="random_thought">Notes</button>
+                            <button class="tab-btn" data-category="idea">Ideas</button>
+                            <button class="tab-btn" data-category="document">Documents</button>
+                            <button class="tab-btn" data-category="due_today" style="border-color: rgba(239, 68, 68, 0.35); color: #f87171;"><i class="fa-solid fa-clock" style="margin-right: 0.25rem;"></i>Due Today</button>
+                        </div>
+                    </div>
+
+                    <!-- Vault Insights Card Container -->
+                    <div id="vault-insights-container" style="margin-bottom: 1.25rem;"></div>
+
+                    <!-- Memory Cards Grid -->
+                    <div class="vault-cards-grid" id="memories-container">
+                        <div class="loading-state">
+                            <i class="fa-solid fa-spinner fa-spin"></i> Loading vault...
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- EDIT DETAILS MODAL Overlay (Hidden by default) -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Edit Memory Details</h3>
+                <button class="close-modal-btn" id="close-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-memory-form">
+                    <input type="hidden" id="edit-memory-id">
+                    
+                    <div class="form-group">
+                        <label for="edit-content">Original Content</label>
+                        <textarea id="edit-content" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-summary">Summary / Scan Title</label>
+                        <input type="text" id="edit-summary" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-category">Category</label>
+                            <select id="edit-category" required>
+                                <option value="business_supplier_quote">Supplier Quote</option>
+                                <option value="business_customer_complaint">Customer Complaint</option>
+                                <option value="business_order">Order Note</option>
+                                <option value="business_inventory_note">Inventory Note</option>
+                                <option value="shopping_link">Shopping Link</option>
+                                <option value="task_reminder">Task Reminder</option>
+                                <option value="random_thought">Random Thought</option>
+                                <option value="idea">Idea</option>
+                                <option value="contact_info">Contact Info</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edit-urgency">Urgency</label>
+                            <select id="edit-urgency" required>
+                                <option value="none">None</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group toggle-group">
+                            <label class="form-toggle-label">
+                                <input type="checkbox" id="edit-business-toggle">
+                                <span>Is Business-Related</span>
+                            </label>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edit-tags">Tags (comma-separated)</label>
+                            <input type="text" id="edit-tags" placeholder="e.g. fabric, satin, quote">
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" class="btn-cancel" id="cancel-edit-btn">Cancel</button>
+                        <button type="submit" class="btn-save">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM CONFIRMATION MODAL -->
+    <div class="modal-overlay" id="confirm-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); align-items: center; justify-content: center; z-index: 2000; padding: 1.5rem;">
+        <div class="modal-card" style="max-width: 400px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; border-radius: 16px; background-color: var(--bg-card); border: 1px solid var(--border-light); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06); animation: zoomIn 0.18s ease-out;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; color: #ef4444; font-size: 1.25rem;">
+                <i class="fa-solid fa-triangle-exclamation" id="confirm-modal-icon"></i>
+                <h3 id="confirm-modal-title" style="font-family: 'League Spartan', sans-serif; font-weight: 800; text-transform: uppercase; font-size: 1.15rem; color: var(--text-primary); margin: 0;">Delete Memory?</h3>
+            </div>
+            <p id="confirm-modal-message" style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">Are you sure you want to delete this memory permanently?</p>
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem;">
+                <button type="button" id="confirm-modal-cancel" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; transition: background-color 0.15s; background-color: transparent; border: 1px solid var(--border-light); color: var(--text-secondary);">Cancel</button>
+                <button type="button" id="confirm-modal-submit" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; transition: background-color 0.15s; background-color: #ef4444; border: none; color: #ffffff;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK ACTION DIALOG MODAL -->
+    <div class="modal-overlay" id="action-form-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); align-items: center; justify-content: center; z-index: 2000; padding: 1.5rem;">
+        <div class="modal-card" style="max-width: 420px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; border-radius: 16px; background-color: var(--bg-card); border: 1px solid var(--border-light); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06); width: 100%; animation: zoomIn 0.18s ease-out;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <i class="fa-solid fa-circle-info" id="action-modal-icon" style="color: var(--accent-color); font-size: 1.25rem;"></i>
+                <h3 id="action-modal-title" style="font-family: 'League Spartan', sans-serif; font-weight: 800; text-transform: uppercase; font-size: 1.15rem; color: var(--text-primary); margin: 0;">Structured Action</h3>
+            </div>
+            
+            <div id="action-modal-form-content" style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.25rem;">
+                <!-- Dynamically injected form fields based on selected action -->
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.75rem;">
+                <button type="button" id="action-modal-cancel" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; transition: background-color 0.15s; background-color: transparent; border: 1px solid var(--border-light); color: var(--text-secondary);">Cancel</button>
+                <button type="button" id="action-modal-submit" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; transition: background-color 0.15s; background-color: var(--accent-color); border: none; color: #ffffff;">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GALLERY PREVIEW MODAL -->
+    <div class="modal-overlay" id="gallery-preview-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); align-items: center; justify-content: center; z-index: 2000; padding: 1rem;">
+        <div class="modal-card" style="max-width: 480px; width: 100%; padding: 1rem; border-radius: 20px; background-color: #111318; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 1rem; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-image" style="color: #60a5fa;"></i> Gallery Photo Preview
+                </span>
+                <button id="close-gallery-preview-modal" style="background: transparent; border: none; color: #8B8F9C; cursor: pointer; font-size: 1.1rem;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div style="width: 100%; max-height: 320px; background: #000; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                <img id="gallery-preview-img" style="max-width: 100%; max-height: 320px; object-fit: contain;">
+            </div>
+            
+            <!-- WhatsApp style caption input -->
+            <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 30px; padding: 0.5rem 1rem; width: 100%;">
+                <i class="fa-solid fa-closed-captioning" style="color: #8B8F9C;"></i>
+                <input type="text" id="gallery-caption-input" placeholder="Add a caption..." style="background: transparent; border: none; color: #ffffff; outline: none; flex: 1; font-size: 0.88rem;">
+            </div>
+            
+            <!-- Preset Gallery Mock Buttons -->
+            <div style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.25rem;">
+                <span style="font-size: 0.65rem; color: #8B8F9C; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Or select a mock photo preset:</span>
+                <div style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+                    <button type="button" class="gallery-preset-pill" data-preset="wedding_saree" style="padding: 0.3rem 0.65rem; font-size: 0.72rem; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #fff; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">Silk Saree</button>
+                    <button type="button" class="gallery-preset-pill" data-preset="home_address" style="padding: 0.3rem 0.65rem; font-size: 0.72rem; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #fff; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">Warehouse Card</button>
+                    <button type="button" class="gallery-preset-pill" data-preset="business_card" style="padding: 0.3rem 0.65rem; font-size: 0.72rem; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #fff; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">Ramesh Contact</button>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.25rem;">
+                <button type="button" id="gallery-preview-cancel-btn" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; background: transparent; border: 1px solid var(--border-light); color: var(--text-secondary);">Cancel</button>
+                <button type="button" id="gallery-preview-send-btn" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; background: #FF6B4A; border: none; color: #ffffff;">Send Photo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CAMERA CAPTURE MODAL -->
+    <div class="modal-overlay" id="camera-capture-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); align-items: center; justify-content: center; z-index: 2000; padding: 1rem;">
+        <div class="modal-card" style="max-width: 480px; width: 100%; padding: 1rem; border-radius: 20px; background-color: #111318; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 1rem; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-camera" style="color: #f87171;"></i> Camera Capture
+                </span>
+                <button id="close-camera-modal" style="background: transparent; border: none; color: #8B8F9C; cursor: pointer; font-size: 1.1rem;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <!-- Camera Live Stream View -->
+            <div id="camera-stream-container" style="position: relative; width: 100%; aspect-ratio: 4/3; background: #000; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                <video id="camera-video" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
+                <canvas id="camera-canvas" style="display: none;"></canvas>
+                
+                <!-- Camera Shutter Overlay -->
+                <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); z-index: 15;">
+                    <button type="button" id="camera-shutter-btn" style="width: 60px; height: 60px; border-radius: 50%; border: 4px solid #ffffff; background: #FF6B4A; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); outline: none; transition: transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'"></button>
+                </div>
+            </div>
+
+            <!-- Preset Camera Snapshot Buttons -->
+            <div id="camera-presets-row" style="display: flex; flex-direction: column; gap: 0.35rem;">
+                <span style="font-size: 0.65rem; color: #8B8F9C; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Or simulate live snap with a preset:</span>
+                <div style="display: flex; gap: 0.45rem;">
+                    <button type="button" class="camera-preset-pill" data-preset="receipt" style="padding: 0.3rem 0.65rem; font-size: 0.72rem; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #fff; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">Supplier Receipt</button>
+                    <button type="button" class="camera-preset-pill" data-preset="saree_tag" style="padding: 0.3rem 0.65rem; font-size: 0.72rem; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #fff; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">Saree Barcode Tag</button>
+                </div>
+            </div>
+
+            <!-- Camera Captured Preview Container (hidden by default) -->
+            <div id="camera-preview-container" style="display: none; flex-direction: column; gap: 0.75rem;">
+                <div style="width: 100%; aspect-ratio: 4/3; background: #000; border-radius: 12px; overflow: hidden;">
+                    <img id="camera-preview-img" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                
+                <!-- WhatsApp style caption input -->
+                <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 30px; padding: 0.5rem 1rem; width: 100%;">
+                    <i class="fa-solid fa-closed-captioning" style="color: #8B8F9C;"></i>
+                    <input type="text" id="camera-caption-input" placeholder="Add a caption..." style="background: transparent; border: none; color: #ffffff; outline: none; flex: 1; font-size: 0.88rem;">
+                </div>
+                
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.25rem;">
+                    <button type="button" id="camera-retry-btn" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; background: transparent; border: 1px solid var(--border-light); color: var(--text-secondary);">Retake</button>
+                    <button type="button" id="camera-send-btn" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; background: #FF6B4A; border: none; color: #ffffff;">Send Photo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOCATION SHARE MODAL -->
+    <div class="modal-overlay" id="location-share-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); align-items: center; justify-content: center; z-index: 2000; padding: 1.5rem;">
+        <div class="modal-card" style="max-width: 440px; width: 100%; padding: 1.5rem; border-radius: 20px; background-color: var(--bg-card); border: 1px solid var(--border-light); display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 12px 40px rgba(0,0,0,0.4);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 1.15rem; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-map-pin" style="color: #a78bfa;"></i> Share Location
+                </span>
+                <button id="close-location-modal" style="background: transparent; border: none; color: #8B8F9C; cursor: pointer; font-size: 1.1rem;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <!-- Geolocation loading screen -->
+            <div id="location-loading-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.08); gap: 0.75rem;">
+                <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2rem; color: #a78bfa;"></i>
+                <span style="font-size: 0.88rem; color: #8B8F9C;">Acquiring GPS Satellite signal...</span>
+            </div>
+
+            <!-- Map View -->
+            <div id="location-map-container" style="display: none; flex-direction: column; gap: 0.75rem;">
+                <div style="width: 100%; height: 200px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08);">
+                    <iframe id="location-map-iframe" style="width: 100%; height: 100%; border: none;"></iframe>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                    <span id="location-coords-label" style="font-size: 0.65rem; font-weight: 700; color: #a78bfa; text-transform: uppercase;">GPS Coordinates</span>
+                    <span id="location-coords-val" style="font-size: 0.82rem; color: var(--text-secondary);">Calculating...</span>
+                </div>
+                
+                <div class="action-form-row">
+                    <label>Place Name / Description</label>
+                    <input type="text" id="location-name-input" placeholder="e.g. My Current Location / Hosur Warehouse Hub">
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.25rem;">
+                <button type="button" id="location-cancel-btn" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; background: transparent; border: 1px solid var(--border-light); color: var(--text-secondary);">Cancel</button>
+                <button type="button" id="location-send-btn" style="display: none; padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; background: #FF6B4A; border: none; color: #ffffff;">Share Location</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTACT PICKER MODAL -->
+    <div class="modal-overlay" id="contact-picker-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); align-items: center; justify-content: center; z-index: 2000; padding: 1.5rem;">
+        <div class="modal-card" style="max-width: 420px; width: 100%; padding: 1.5rem; border-radius: 20px; background-color: var(--bg-card); border: 1px solid var(--border-light); display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 12px 40px rgba(0,0,0,0.4); max-height: 85vh;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 1.15rem; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-address-book" style="color: #34d399;"></i> Select Contacts
+                </span>
+                <button id="close-contact-picker-btn" style="background: transparent; border: none; color: #8B8F9C; cursor: pointer; font-size: 1.1rem;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <!-- Search bar -->
+            <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 30px; padding: 0.5rem 1rem; width: 100%;">
+                <i class="fa-solid fa-magnifying-glass" style="color: #8B8F9C; font-size: 0.82rem;"></i>
+                <input type="text" id="contact-search-input" placeholder="Search contacts..." style="background: transparent; border: none; color: #ffffff; outline: none; flex: 1; font-size: 0.88rem;">
+            </div>
+            
+            <!-- Contacts list -->
+            <div id="contacts-list-container" style="display: flex; flex-direction: column; gap: 0.65rem; overflow-y: auto; flex: 1; padding-right: 0.25rem; margin: 0.25rem 0;">
+                <!-- Injected via JavaScript -->
+            </div>
+            
+            <!-- Form to create custom contact -->
+            <div id="contact-custom-form" style="display: none; flex-direction: column; gap: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.85rem;">
+                <div style="font-size: 0.75rem; font-weight: 700; color: #34d399; text-transform: uppercase;">Create Custom Contact</div>
+                <div class="action-form-row" style="margin-bottom: 0.5rem;">
+                    <label style="font-size: 0.7rem; color: var(--text-secondary);">Full Name</label>
+                    <input type="text" id="new-contact-name" placeholder="e.g. Ramesh Fabrics" style="width: 100%; padding: 0.45rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); color: #fff; font-size: 0.8rem; outline: none;">
+                </div>
+                <div class="action-form-row" style="margin-bottom: 0.5rem;">
+                    <label style="font-size: 0.7rem; color: var(--text-secondary);">Phone Number</label>
+                    <input type="text" id="new-contact-phone" placeholder="e.g. 9876543210" style="width: 100%; padding: 0.45rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); color: #fff; font-size: 0.8rem; outline: none;">
+                </div>
+                <div class="action-form-row" style="margin-bottom: 0.5rem;">
+                    <label style="font-size: 0.7rem; color: var(--text-secondary);">Email Address</label>
+                    <input type="text" id="new-contact-email" placeholder="e.g. sales@rameshfabrics.com" style="width: 100%; padding: 0.45rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); color: #fff; font-size: 0.8rem; outline: none;">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem;">
+                <button type="button" id="btn-toggle-new-contact" style="padding: 0.45rem 0.85rem; font-family: 'League Spartan', sans-serif; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; border-radius: 6px; cursor: pointer; background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.2); color: #34d399; transition: all 0.15s; outline: none;">
+                    <i class="fa-solid fa-plus" style="margin-right: 0.25rem;"></i> New Contact
+                </button>
+                <div style="display: flex; gap: 0.65rem;">
+                    <button type="button" id="contact-picker-cancel" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; background: transparent; border: 1px solid var(--border-light); color: var(--text-secondary);">Cancel</button>
+                    <button type="button" id="contact-picker-send" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; background: #FF6B4A; border: none; color: #ffffff;">Share</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real hidden gallery selector -->
+    <input type="file" id="real-gallery-input" accept="image/*" style="display: none;">
+    
+    <!-- Real hidden document selector -->
+    <input type="file" id="real-document-input" accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.csv" style="display: none;">
+
+    <!-- DOCUMENT PREVIEW MODAL -->
+    <div class="modal-overlay" id="document-preview-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); align-items: center; justify-content: center; z-index: 2000; padding: 1.5rem;">
+        <div class="modal-card" style="max-width: 440px; width: 100%; padding: 1.5rem; border-radius: 20px; background-color: #111318; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 1.1rem; color: #ffffff; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-file-pdf" style="color: #60a5fa;"></i> Send Document
+                </span>
+                <button id="close-document-preview-modal" style="background: transparent; border: none; color: #8B8F9C; cursor: pointer; font-size: 1.1rem;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <!-- Document File Visualizer Box -->
+            <div style="display: flex; align-items: center; gap: 1rem; padding: 1.2rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; width: 100%;">
+                <div style="width: 50px; height: 50px; border-radius: 8px; background: #60a5fa; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 1.5rem; flex-shrink: 0;">
+                    <i class="fa-solid fa-file-invoice" id="doc-preview-icon"></i>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.2rem; overflow: hidden; flex: 1;">
+                    <span id="doc-preview-name" style="font-size: 0.9rem; font-weight: 700; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">invoice_ramesh_mills.pdf</span>
+                    <span id="doc-preview-size" style="font-size: 0.75rem; color: #8B8F9C;">PDF Document • 45 KB</span>
+                </div>
+            </div>
+            
+            <!-- WhatsApp style caption input -->
+            <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 30px; padding: 0.5rem 1rem; width: 100%;">
+                <i class="fa-solid fa-closed-captioning" style="color: #8B8F9C;"></i>
+                <input type="text" id="document-caption-input" placeholder="Add a caption..." style="background: transparent; border: none; color: #ffffff; outline: none; flex: 1; font-size: 0.88rem;">
+            </div>
+
+            <!-- Preset Document Mock Buttons -->
+            <div style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.25rem;">
+                <span style="font-size: 0.65rem; color: #8B8F9C; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Or select a mock document preset:</span>
+                <div style="display: flex; gap: 0.45rem; flex-wrap: wrap;">
+                    <button type="button" class="document-preset-pill" data-preset="invoice_pdf" style="padding: 0.3rem 0.65rem; font-size: 0.72rem; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #fff; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">Supplier Invoice PDF</button>
+                    <button type="button" class="document-preset-pill" data-preset="stock_sheet" style="padding: 0.3rem 0.65rem; font-size: 0.72rem; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #fff; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">Inventory Stock Sheet</button>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.25rem;">
+                <button type="button" id="document-preview-cancel-btn" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; background: transparent; border: 1px solid var(--border-light); color: var(--text-secondary);">Cancel</button>
+                <button type="button" id="document-preview-send-btn" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; background: #FF6B4A; border: none; color: #ffffff;">Send Document</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App JavaScript Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
+

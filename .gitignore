@@ -1,0 +1,19 @@
+# Local SQLite database
+memories.db
+memories.db-journal
+memories.db-wal
+
+# Python cache & build files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Environments
+.env
+.venv/
+venv/
+ENV/
+
+# Log files
+*.log
