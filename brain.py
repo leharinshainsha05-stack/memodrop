@@ -630,15 +630,18 @@ def mock_compare_quotes(query: str, quotes: list) -> dict:
     }
 
 
-def classify_document_folder(text: str) -> str:
+def classify_document_folder(text: str, filename: str = None) -> str:
     """
     Classifies document text sample using Groq LLM.
     Returns one of: 'Government & Legal', 'Business & Finance', 'Academic & Coursework', 'Personal'.
     """
     folders = ["Government & Legal", "Business & Finance", "Academic & Coursework", "Personal"]
     
-    text_sample = (text or "").strip()[:2000]
-    if not text_sample:
+    # Prepend filename to the text for robust classification (especially for scanned/image-only files)
+    text_to_analyze = f"Filename: {filename or ''}\nContent: {text or ''}".strip()
+    
+    text_sample = text_to_analyze[:2000]
+    if not text_sample or text_sample.lower().strip() in ["filename:", "filename: content:"]:
         return "Personal"
         
     if not Config.GROQ_API_KEY or not groq_client:

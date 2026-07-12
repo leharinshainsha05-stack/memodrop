@@ -132,7 +132,7 @@ async def api_send_message(request: Request):
             
         base64_data = parts[1].strip() if len(parts) > 1 else ""
         doc_text = extract_document_text(filename, base64_data)
-        document_folder = brain.classify_document_folder(doc_text)
+        document_folder = brain.classify_document_folder(doc_text, filename)
         print(f"[DEBUG] Filename: {filename}, base64 len: {len(base64_data)}, extracted len: {len(doc_text)}, classified: {document_folder}", flush=True)
 
     # Step 1: Intent Routing
