@@ -514,6 +514,7 @@ def get_memory(memory_id: str) -> dict:
                     "user_phone": r.get("user_phone") or (ent.get("user_phone") if isinstance(ent, dict) else "anonymous"),
                     "due_date": r.get("due_date") or (ent.get("due_date") if isinstance(ent, dict) else None),
                     "reminder_status": r.get("reminder_status") or (ent.get("reminder_status") if isinstance(ent, dict) else "pending"),
+                    "document_folder": r.get("document_folder") or (ent.get("document_folder") if isinstance(ent, dict) else None),
                     "created_at": r["created_at"]
                 }
         except Exception as e:
@@ -566,29 +567,29 @@ def get_all_memories(category: str = None, user_phone: str = None) -> list:
             response = query.order("created_at", desc=True).execute()
             
             results = response.data
+            for r in results:
+                ent = r.get("entities")
+                if isinstance(ent, str):
+                    try: ent = json.loads(ent)
+                    except: ent = {}
+                if not r.get("due_date") and isinstance(ent, dict):
+                    r["due_date"] = ent.get("due_date")
+                if not r.get("reminder_status") and isinstance(ent, dict):
+                    r["reminder_status"] = ent.get("reminder_status", "pending")
+                if not r.get("document_folder") and isinstance(ent, dict):
+                    r["document_folder"] = ent.get("document_folder")
+                    
             if user_phone:
                 filtered = []
                 for r in results:
                     db_phone = r.get("user_phone")
                     ent = r.get("entities")
                     if isinstance(ent, str):
-                        try:
-                            ent = json.loads(ent)
-                        except:
-                            ent = {}
+                        try: ent = json.loads(ent)
+                        except: ent = {}
                     ent_phone = ent.get("user_phone") if isinstance(ent, dict) else None
                     if db_phone == user_phone or ent_phone == user_phone:
                         filtered.append(r)
-                # Map due_date and reminder_status consistently
-                for r in filtered:
-                    ent = r.get("entities")
-                    if isinstance(ent, str):
-                        try: ent = json.loads(ent)
-                        except: ent = {}
-                    if not r.get("due_date") and isinstance(ent, dict):
-                        r["due_date"] = ent.get("due_date")
-                    if not r.get("reminder_status") and isinstance(ent, dict):
-                        r["reminder_status"] = ent.get("reminder_status", "pending")
                 return filtered
             return results
         except Exception as e:
@@ -662,7 +663,7 @@ def search_memories(query_text: str, query_embedding: list = None, limit: int = 
                 if user_phone:
                     matches = [m for m in matches if m.get("user_phone") == user_phone or (m.get("entities") and (json.loads(m.get("entities")) if isinstance(m.get("entities"), str) else m.get("entities")).get("user_phone") == user_phone)]
                 
-                # Consistently assign due_date and reminder_status mapping
+                # Consistently assign due_date, reminder_status and document_folder mapping
                 for m in matches:
                     ent = m.get("entities")
                     if isinstance(ent, str):
@@ -672,6 +673,8 @@ def search_memories(query_text: str, query_embedding: list = None, limit: int = 
                         m["due_date"] = ent.get("due_date")
                     if not m.get("reminder_status") and isinstance(ent, dict):
                         m["reminder_status"] = ent.get("reminder_status", "pending")
+                    if not m.get("document_folder") and isinstance(ent, dict):
+                        m["document_folder"] = ent.get("document_folder")
                         
                 return matches[:limit]
             else:
@@ -707,6 +710,7 @@ def search_memories(query_text: str, query_embedding: list = None, limit: int = 
                     phone_val = r["user_phone"] if "user_phone" in r.keys() else entities_data.get("user_phone", "anonymous")
                     due_val = r["due_date"] if "due_date" in r.keys() else entities_data.get("due_date")
                     status_val = r["reminder_status"] if "reminder_status" in r.keys() else entities_data.get("reminder_status", "pending")
+                    folder_val = r["document_folder"] if "document_folder" in r.keys() else entities_data.get("document_folder")
                     results.append({
                         "id": r["id"],
                         "content": r["content"],
@@ -721,6 +725,7 @@ def search_memories(query_text: str, query_embedding: list = None, limit: int = 
                         "user_phone": phone_val,
                         "due_date": due_val,
                         "reminder_status": status_val,
+                        "document_folder": folder_val,
                         "created_at": r["created_at"],
                         "similarity": similarity
                     })
@@ -755,6 +760,7 @@ def search_memories(query_text: str, query_embedding: list = None, limit: int = 
             phone_val = r["user_phone"] if "user_phone" in r.keys() else entities_data.get("user_phone", "anonymous")
             due_val = r["due_date"] if "due_date" in r.keys() else entities_data.get("due_date")
             status_val = r["reminder_status"] if "reminder_status" in r.keys() else entities_data.get("reminder_status", "pending")
+            folder_val = r["document_folder"] if "document_folder" in r.keys() else entities_data.get("document_folder")
             results.append({
                 "id": r["id"],
                 "content": r["content"],
@@ -769,6 +775,7 @@ def search_memories(query_text: str, query_embedding: list = None, limit: int = 
                 "user_phone": phone_val,
                 "due_date": due_val,
                 "reminder_status": status_val,
+                "document_folder": folder_val,
                 "created_at": r["created_at"],
                 "similarity": score / (len(query_words) + 1) # Normalization
             })
