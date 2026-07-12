@@ -18,8 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Navigation Elements ---
     const navChatBtn = document.getElementById('nav-chat-btn');
     const navVaultBtn = document.getElementById('nav-vault-btn');
+    const navFoldersBtn = document.getElementById('nav-folders-btn');
     const viewChat = document.getElementById('view-chat');
     const viewVault = document.getElementById('view-vault');
+    const viewFolders = document.getElementById('view-folders');
 
     // --- Chat Interface Elements ---
     const chatInput = document.querySelector('#view-chat #chat-input');
@@ -325,6 +327,12 @@ document.addEventListener('DOMContentLoaded', () => {
         switchView('vault');
     });
 
+    if (navFoldersBtn) {
+        navFoldersBtn.addEventListener('click', () => {
+            switchView('folders');
+        });
+    }
+
     // Logo click redirects to Chat view (Home Page)
     const topbarLogo = document.querySelector('.topbar-left');
     const sidebarLogo = document.querySelector('.sidebar-logo');
@@ -345,16 +353,45 @@ document.addEventListener('DOMContentLoaded', () => {
         if (viewName === 'chat') {
             navChatBtn.classList.add('active');
             navVaultBtn.classList.remove('active');
+            if (navFoldersBtn) navFoldersBtn.classList.remove('active');
             viewChat.classList.add('active');
             viewVault.classList.remove('active');
+            if (viewFolders) viewFolders.classList.remove('active');
             renderChat(); // Re-render chat layout on load
-        } else {
+        } else if (viewName === 'vault') {
             navVaultBtn.classList.add('active');
             navChatBtn.classList.remove('active');
+            if (navFoldersBtn) navFoldersBtn.classList.remove('active');
             viewVault.classList.add('active');
             viewChat.classList.remove('active');
+            if (viewFolders) viewFolders.classList.remove('active');
             loadMemories(); // Refresh when opening vault
+        } else if (viewName === 'folders') {
+            if (navFoldersBtn) navFoldersBtn.classList.add('active');
+            navChatBtn.classList.remove('active');
+            navVaultBtn.classList.remove('active');
+            if (viewFolders) viewFolders.classList.add('active');
+            viewChat.classList.remove('active');
+            viewVault.classList.remove('active');
+            loadFoldersView(); // Refresh and load folders view contents
         }
+    }
+
+    // Folder Cards & Folders Back Click Listeners
+    const folderCards = document.querySelectorAll('.folder-card');
+    folderCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const folderName = card.getAttribute('data-folder');
+            openFolder(folderName);
+        });
+    });
+
+    const backToFoldersBtn = document.getElementById('back-to-folders-btn');
+    if (backToFoldersBtn) {
+        backToFoldersBtn.addEventListener('click', () => {
+            document.getElementById('folders-index-level').style.display = 'block';
+            document.getElementById('folder-contents-level').style.display = 'none';
+        });
     }
 
     // --- Chat Composer Listeners ---
@@ -1623,6 +1660,53 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     window.loadMemories = loadMemories;
+
+    let groupedDocuments = {};
+
+    async function loadFoldersView() {
+        document.getElementById('folders-index-level').style.display = 'block';
+        document.getElementById('folder-contents-level').style.display = 'none';
+        
+        try {
+            const showBusinessMode = modeToggle.checked;
+            const response = await fetch(`/api/vault/documents?user_phone=${encodeURIComponent(currentUserPhone || 'anonymous')}&is_business=${showBusinessMode}`);
+            const data = await response.json();
+            groupedDocuments = data.documents || {};
+
+            // Update folder card counters
+            document.getElementById('folder-count-gov').innerText = `${(groupedDocuments['Government & Legal'] || []).length} files`;
+            document.getElementById('folder-count-biz').innerText = `${(groupedDocuments['Business & Finance'] || []).length} files`;
+            document.getElementById('folder-count-acad').innerText = `${(groupedDocuments['Academic & Coursework'] || []).length} files`;
+            document.getElementById('folder-count-personal').innerText = `${(groupedDocuments['Personal'] || []).length} files`;
+        } catch (error) {
+            console.error('Error loading folders view:', error);
+        }
+    }
+    window.loadFoldersView = loadFoldersView;
+
+    function openFolder(folderName) {
+        const showBusinessMode = modeToggle.checked;
+        const docsList = groupedDocuments[folderName] || [];
+        
+        document.getElementById('folders-index-level').style.display = 'none';
+        document.getElementById('folder-contents-level').style.display = 'block';
+        
+        document.getElementById('active-folder-name').innerText = folderName;
+        document.getElementById('active-folder-count').innerText = docsList.length;
+        
+        const container = document.getElementById('folder-memories-container');
+        if (docsList.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state" style="grid-column: 1 / -1; width: 100%;">
+                    <i class="fa-solid fa-folder-open"></i>
+                    <p>No documents found in this folder.</p>
+                </div>
+            `;
+        } else {
+            container.innerHTML = docsList.map(m => buildMemoryCardHtml(m, showBusinessMode)).join('');
+        }
+    }
+    window.openFolder = openFolder;
 
     /**
      * Category Icons Mapper
