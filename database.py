@@ -499,6 +499,42 @@ def find_duplicate_memory(content: str, user_phone: str = None) -> dict:
     return None
 
 
+def get_storage_usage(user_phone: str = None) -> dict:
+    """Calculates storage usage in bytes for the user."""
+    try:
+        memories = get_all_memories(user_phone=user_phone)
+        used_bytes = sum(len(m.get("content", "").encode('utf-8')) for m in memories)
+        
+        # 15 GB limit in bytes
+        limit_bytes = 15 * 1024 * 1024 * 1024 # 16,106,127,360 bytes
+        percentage = (used_bytes / limit_bytes) * 100 if limit_bytes > 0 else 0
+        
+        def format_size(bytes_size):
+            if bytes_size < 1024:
+                return f"{bytes_size} B"
+            elif bytes_size < 1024 * 1024:
+                return f"{bytes_size / 1024:.1f} KB"
+            elif bytes_size < 1024 * 1024 * 1024:
+                return f"{bytes_size / (1024 * 1024):.1f} MB"
+            else:
+                return f"{bytes_size / (1024 * 1024 * 1024):.1f} GB"
+                
+        return {
+            "status": "success",
+            "used_bytes": used_bytes,
+            "limit_bytes": limit_bytes,
+            "used_formatted": format_size(used_bytes),
+            "limit_formatted": format_size(limit_bytes),
+            "percentage": round(percentage, 4)
+        }
+    except Exception as e:
+        print(f"[Database] Error calculating storage usage: {e}")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+
 def get_memory(memory_id: str) -> dict:
     """Retrieves a single memory by ID."""
     if Config.USE_SUPABASE:

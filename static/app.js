@@ -1624,6 +1624,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function refreshAllViews() {
         await loadMemories();
+        await updateStorageUsage();
         if (window.loadFoldersView) {
             await window.loadFoldersView();
             const activeFolderContainer = document.getElementById('folder-contents-level');
@@ -1777,6 +1778,138 @@ document.addEventListener('DOMContentLoaded', () => {
             replaceBtn.addEventListener('click', onReplace);
             separateBtn.addEventListener('click', onSeparate);
             cancelBtn.addEventListener('click', onCancel);
+        });
+    }
+
+    let isSimulatingStorageFull = localStorage.getItem('simulate_storage_full') === 'true';
+    let currentStorageUsagePercent = 0;
+
+    async function updateStorageUsage() {
+        const phone = currentUserPhone || 'anonymous';
+        try {
+            const res = await fetch(`/api/vault/storage?user_phone=${encodeURIComponent(phone)}`);
+            const data = await res.json();
+            
+            const storageBtn = document.getElementById('sidebar-storage-btn');
+            const storageDot = document.getElementById('sidebar-storage-dot');
+            const billingBar = document.getElementById('billing-storage-bar');
+            const billingText = document.getElementById('billing-storage-text');
+            const billingPercent = document.getElementById('billing-storage-percent');
+            const planBadge = document.getElementById('billing-current-plan-badge');
+            
+            let percent = data.percentage || 0;
+            let usedText = `${data.used_formatted || '0 B'} of ${data.limit_formatted || '15 GB'}`;
+            let activePercentText = `${(data.percentage || 0).toFixed(4)}% used`;
+            let dotColor = '#22c55e'; // Green
+            
+            if (isSimulatingStorageFull) {
+                percent = 100;
+                usedText = "15.0 GB of 15.0 GB";
+                activePercentText = "100% used (Simulated Full)";
+                dotColor = '#ef4444'; // Red
+                if (storageBtn) storageBtn.title = "Storage Full (15.0 GB of 15.0 GB used)";
+            } else {
+                if (percent >= 90) dotColor = '#ef4444'; // Red
+                else if (percent >= 70) dotColor = '#f59e0b'; // Orange
+                if (storageBtn) storageBtn.title = `Storage: ${usedText} (${percent.toFixed(2)}% used)`;
+            }
+            
+            currentStorageUsagePercent = percent;
+            
+            if (storageDot) storageDot.style.backgroundColor = dotColor;
+            if (billingBar) billingBar.style.width = `${percent}%`;
+            if (billingText) billingText.innerText = usedText;
+            if (billingPercent) billingPercent.innerText = activePercentText;
+        } catch (err) {
+            console.error("Error updating storage usage:", err);
+        }
+    }
+    window.updateStorageUsage = updateStorageUsage;
+
+    // Billing modal toggle and event setup
+    const billingModal = document.getElementById('billing-modal');
+    const simulateToggle = document.getElementById('simulate-full-toggle');
+    const simulateToggleBg = document.getElementById('simulate-toggle-bg');
+    const simulateToggleDot = document.getElementById('simulate-toggle-dot');
+    
+    function setSimulateToggleUI(active) {
+        if (simulateToggle) simulateToggle.checked = active;
+        if (simulateToggleBg && simulateToggleDot) {
+            if (active) {
+                simulateToggleBg.style.backgroundColor = 'var(--accent-color)';
+                simulateToggleDot.style.left = '25px';
+                simulateToggleDot.style.background = '#ffffff';
+            } else {
+                simulateToggleBg.style.backgroundColor = '#374151';
+                simulateToggleDot.style.left = '3px';
+                simulateToggleDot.style.background = '#9ca3af';
+            }
+        }
+    }
+
+    if (simulateToggle) {
+        setSimulateToggleUI(isSimulatingStorageFull);
+        simulateToggle.addEventListener('change', (e) => {
+            isSimulatingStorageFull = e.target.checked;
+            localStorage.setItem('simulate_storage_full', isSimulatingStorageFull ? 'true' : 'false');
+            setSimulateToggleUI(isSimulatingStorageFull);
+            updateStorageUsage();
+        });
+    }
+
+    const storageBtn = document.getElementById('sidebar-storage-btn');
+    if (storageBtn) {
+        storageBtn.addEventListener('click', () => {
+            if (billingModal) {
+                updateStorageUsage();
+                billingModal.style.display = 'flex';
+            }
+        });
+    }
+
+    const billingClose = document.getElementById('billing-modal-close');
+    if (billingClose) {
+        billingClose.addEventListener('click', () => {
+            if (billingModal) billingModal.style.display = 'none';
+        });
+    }
+
+    // Pro and business upgrade clicks
+    const upgradeProBtn = document.getElementById('upgrade-pro-btn');
+    const upgradeBizBtn = document.getElementById('upgrade-biz-btn');
+    const planBadge = document.getElementById('billing-current-plan-badge');
+
+    if (upgradeProBtn) {
+        upgradeProBtn.addEventListener('click', () => {
+            isSimulatingStorageFull = false;
+            localStorage.setItem('simulate_storage_full', 'false');
+            setSimulateToggleUI(false);
+            
+            if (planBadge) {
+                planBadge.innerText = 'Pro Plan (100 GB)';
+                planBadge.style.color = 'var(--accent-color)';
+            }
+            
+            updateStorageUsage();
+            showCustomAlert("Upgrade Success", "🎉 Thank you for upgrading to Pro Plan! Your storage capacity has been expanded to 100 GB.");
+            if (billingModal) billingModal.style.display = 'none';
+        });
+    }
+
+    if (upgradeBizBtn) {
+        upgradeBizBtn.addEventListener('click', () => {
+            isSimulatingStorageFull = false;
+            localStorage.setItem('simulate_storage_full', 'false');
+            setSimulateToggleUI(false);
+            
+            if (planBadge) {
+                planBadge.innerText = 'Business Plan (2 TB)';
+                planBadge.style.color = '#c084fc';
+            }
+            
+            updateStorageUsage();
+            showCustomAlert("Upgrade Success", "🚀 Thank you for upgrading to Business Plan! Your storage capacity has been expanded to 2 TB.");
+            if (billingModal) billingModal.style.display = 'none';
         });
     }
 
@@ -2579,6 +2712,16 @@ document.addEventListener('DOMContentLoaded', () => {
     async function handleSendMessage() {
         const text = chatInput.value.trim();
         if (!text) return;
+        
+        const isDump = currentComposerMode !== 'ask' || text.startsWith('[Document Attachment]') || text.startsWith('[Image Attachment]') || text.startsWith('[Location Attachment]') || text.startsWith('[Contact Attachment]');
+        if (isDump && currentStorageUsagePercent >= 100) {
+            showCustomAlert("Storage Full", "⚠️ Your storage space is 100% full! Please upgrade your plan or delete some memories to continue saving new ones.");
+            if (billingModal) {
+                updateStorageUsage();
+                billingModal.style.display = 'flex';
+            }
+            return;
+        }
         
         chatInput.value = '';
         
@@ -3548,6 +3691,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             renderHeaderUserSection();
             loadMemories();
+            updateStorageUsage();
         }
     }
 });

@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=League+Spartan:wght@700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=2.0.8">
+    <link rel="stylesheet" href="style.css?v=2.0.9">
 </head>
 <body>
     
@@ -36,7 +36,11 @@
                     <span>Folders</span>
                 </button>
             </nav>
-            <div class="sidebar-footer">
+            <div class="sidebar-footer" style="display: flex; flex-direction: column; gap: 0.75rem; align-items: center; width: 100%;">
+                <button class="nav-item-icon" id="sidebar-storage-btn" title="Storage Usage" style="position: relative; transition: color 0.15s, transform 0.15s;">
+                    <i class="fa-solid fa-cloud"></i>
+                    <div id="sidebar-storage-dot" style="position: absolute; bottom: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background-color: #22c55e; border: 2px solid var(--bg-sidebar);"></div>
+                </button>
                 <button class="nav-item-icon" title="Settings"><i class="fa-solid fa-sliders"></i></button>
             </div>
         </aside>
@@ -401,6 +405,81 @@
         </div>
     </div>
 
+    <!-- STORAGE LIMIT & BILLING MODAL -->
+    <div class="modal-overlay" id="billing-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); align-items: center; justify-content: center; z-index: 2000; padding: 1.5rem;">
+        <div class="modal-card" style="max-width: 480px; padding: 1.75rem; display: flex; flex-direction: column; gap: 1.25rem; border-radius: 20px; background-color: var(--bg-card); border: 1px solid var(--border-light); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.08); width: 100%; animation: zoomIn 0.18s ease-out;">
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; color: var(--accent-color); font-size: 1.25rem;">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <h3 style="font-family: 'League Spartan', sans-serif; font-weight: 800; text-transform: uppercase; font-size: 1.2rem; color: var(--text-primary); margin: 0;">Storage Plans</h3>
+                </div>
+                <button type="button" id="billing-modal-close" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.15rem; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; transition: color 0.15s, background-color 0.15s; outline: none;">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <!-- Usage Card -->
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-light); border-radius: 12px; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);">
+                    <span>Drive Storage Used</span>
+                    <span id="billing-storage-text">0 KB of 15 GB</span>
+                </div>
+                <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; overflow: hidden; position: relative;">
+                    <div id="billing-storage-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #ff6b4a, #d946ef); border-radius: 4px; transition: width 0.3s ease;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.1rem;">
+                    <span id="billing-storage-percent">0% used</span>
+                    <span>Plan: <strong style="color: #60a5fa;" id="billing-current-plan-badge">Free Tier</strong></span>
+                </div>
+            </div>
+            
+            <!-- Plans Grid -->
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <!-- Pro Plan -->
+                <div style="border: 1px solid rgba(255, 107, 74, 0.3); background: rgba(255, 107, 74, 0.03); border-radius: 12px; padding: 0.9rem 1.1rem; display: flex; justify-content: space-between; align-items: center; transition: transform 0.15s;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 0.4rem;">
+                            <strong style="color: var(--text-primary); font-size: 0.88rem;">100 GB Pro</strong>
+                            <span style="background: rgba(255, 107, 74, 0.15); border: 1px solid rgba(255, 107, 74, 0.3); color: var(--accent-color); font-size: 0.62rem; font-weight: 700; text-transform: uppercase; padding: 0.1rem 0.35rem; border-radius: 4px; letter-spacing: 0.05em;">Popular</span>
+                        </div>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0.2rem 0 0;">Perfect for personal docs and notes</p>
+                    </div>
+                    <button type="button" id="upgrade-pro-btn" style="background-color: var(--accent-color); color: #ffffff; font-family: 'League Spartan', sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 0.45rem 0.9rem; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.15s;">
+                        $1.99/mo
+                    </button>
+                </div>
+                
+                <!-- Business Plan -->
+                <div style="border: 1px solid var(--border-light); background: rgba(255, 255, 255, 0.01); border-radius: 12px; padding: 0.9rem 1.1rem; display: flex; justify-content: space-between; align-items: center; transition: transform 0.15s;">
+                    <div>
+                        <strong style="color: var(--text-primary); font-size: 0.88rem;">2 TB Business</strong>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0.2rem 0 0;">For team archives and big datasets</p>
+                    </div>
+                    <button type="button" id="upgrade-biz-btn" style="background-color: transparent; border: 1px solid var(--border-light); color: var(--text-primary); font-family: 'League Spartan', sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 0.45rem 0.9rem; border-radius: 8px; cursor: pointer; transition: background-color 0.15s, border-color 0.15s;">
+                        $9.99/mo
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Simulation Debug Toggle -->
+            <div style="border-top: 1px dashed var(--border-dark); padding-top: 0.9rem; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 0.35rem;">
+                        <i class="fa-solid fa-bug" style="color: #ec4899;"></i> Simulate Full Storage
+                    </span>
+                    <p style="font-size: 0.7rem; color: var(--text-muted); margin: 0.15rem 0 0;">Instantly tests the limit warning paywall block</p>
+                </div>
+                <label style="margin: 0; cursor: pointer; display: inline-flex; align-items: center;">
+                    <input type="checkbox" id="simulate-full-toggle" style="display: none;">
+                    <span id="simulate-toggle-bg" style="width: 44px; height: 22px; background: #374151; border-radius: 11px; display: inline-block; position: relative; transition: background-color 0.15s;">
+                        <span id="simulate-toggle-dot" style="position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #9ca3af; transition: left 0.15s, background-color 0.15s;"></span>
+                    </span>
+                </label>
+            </div>
+        </div>
+    </div>
+
     <!-- QUICK ACTION DIALOG MODAL -->
     <div class="modal-overlay" id="action-form-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); align-items: center; justify-content: center; z-index: 2000; padding: 1.5rem;">
         <div class="modal-card" style="max-width: 420px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; border-radius: 16px; background-color: var(--bg-card); border: 1px solid var(--border-light); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06); width: 100%; animation: zoomIn 0.18s ease-out;">
@@ -647,7 +726,7 @@
     </div>
 
     <!-- App JavaScript Logic -->
-    <script src="app.js?v=2.0.8"></script>
+    <script src="app.js?v=2.0.9"></script>
 </body>
 </html>
 

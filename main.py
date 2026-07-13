@@ -469,6 +469,19 @@ async def api_get_vault_documents(user_phone: str = None, is_business: bool = No
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
+@app.get("/api/vault/storage")
+async def api_get_vault_storage(user_phone: str = None):
+    """
+    Returns the storage space usage of a user.
+    """
+    try:
+        usage = database.get_storage_usage(user_phone)
+        return JSONResponse(usage)
+    except Exception as e:
+        print(f"[API] Error getting vault storage usage: {e}")
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
 @app.post("/api/vault/folders/create")
 @app.post("/vault/folders/create")
 async def api_convert_to_folder(request: Request):
