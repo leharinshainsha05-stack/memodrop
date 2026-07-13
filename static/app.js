@@ -1612,7 +1612,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Dynamically update the state array and re-render
                 updateChatBubblesForMemory(updatedMemory);
-                loadMemories(); // Refresh grid
+                refreshAllViews(); // Refresh grid
             } else {
                 showCustomAlert('Save Failed', 'Failed to save changes: ' + data.message);
             }
@@ -1621,6 +1621,19 @@ document.addEventListener('DOMContentLoaded', () => {
             showCustomAlert('Database Error', 'Error connecting to database to save edits.');
         }
     });
+
+    async function refreshAllViews() {
+        await loadMemories();
+        if (window.loadFoldersView) {
+            await window.loadFoldersView();
+            const activeFolderContainer = document.getElementById('folder-contents-level');
+            if (activeFolderContainer && activeFolderContainer.style.display === 'block') {
+                const activeFolderName = document.getElementById('active-folder-name').innerText;
+                window.openFolder(activeFolderName);
+            }
+        }
+    }
+    window.refreshAllViews = refreshAllViews;
 
     // --- Database Core Functions ---
 
@@ -2768,7 +2781,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         chatMessages = chatMessages.filter(m => m.id !== memoryId && m.id !== linkedId);
                         
                         renderChat();
-                        loadMemories();
+                        refreshAllViews();
                     } else {
                         showCustomAlert('Delete Failed', 'Failed to delete memory: ' + data.message);
                     }
@@ -2985,7 +2998,7 @@ document.addEventListener('DOMContentLoaded', () => {
             chatMessages = chatMessages.filter(m => m.id !== id && m.id !== linkedId);
             
             renderChat();
-            loadMemories();
+            refreshAllViews();
         };
 
         if (isDbMemory) {
