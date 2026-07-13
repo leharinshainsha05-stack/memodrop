@@ -203,7 +203,7 @@ async def api_send_message(request: Request):
     else:  # intent == "dump"
         force_save = data.get("force_save", False)
         if not force_save:
-            existing = database.find_duplicate_memory(ai_process_text, user_phone=user_phone)
+            existing = database.find_duplicate_memory(message_text, user_phone=user_phone)
             if existing:
                 # We pre-calculate what would have been saved so we can pass it to the frontend for replacement
                 brain_data = brain.process_dump(ai_process_text, media_type, timestamp)
@@ -228,7 +228,7 @@ async def api_send_message(request: Request):
                     final_folder = "Personal"
                     
                 new_memory_data = {
-                    "content": ai_process_text,
+                    "content": message_text,
                     "category": category,
                     "summary": summary,
                     "entities": entities,
