@@ -1728,9 +1728,50 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     window.loadFoldersView = loadFoldersView;
 
+    function showNewFolderModal() {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('new-folder-modal');
+            const input = document.getElementById('new-folder-input');
+            const cancelBtn = document.getElementById('new-folder-modal-cancel');
+            const confirmBtn = document.getElementById('new-folder-modal-submit');
+            
+            input.value = '';
+            modal.style.display = 'flex';
+            input.focus();
+            
+            function cleanUp() {
+                modal.style.display = 'none';
+                confirmBtn.removeEventListener('click', onSubmit);
+                cancelBtn.removeEventListener('click', onCancel);
+                input.removeEventListener('keypress', onKeyPress);
+            }
+            
+            function onSubmit() {
+                const val = input.value.trim();
+                cleanUp();
+                resolve(val);
+            }
+            
+            function onCancel() {
+                cleanUp();
+                resolve(null);
+            }
+            
+            function onKeyPress(e) {
+                if (e.key === 'Enter') {
+                    onSubmit();
+                }
+            }
+            
+            confirmBtn.addEventListener('click', onSubmit);
+            cancelBtn.addEventListener('click', onCancel);
+            input.addEventListener('keypress', onKeyPress);
+        });
+    }
+
     async function convertResultsToFolder(matchedIdsStr) {
-        const folderName = prompt("Enter a name for the new folder:");
-        if (!folderName || !folderName.trim()) return;
+        const folderName = await showNewFolderModal();
+        if (!folderName) return;
 
         const memoryIds = matchedIdsStr.split(',');
         try {

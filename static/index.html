@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=League+Spartan:wght@700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=2.0.3">
+    <link rel="stylesheet" href="style.css?v=2.0.4">
 </head>
 <body>
     
@@ -359,6 +359,24 @@
         </div>
     </div>
 
+    <!-- NEW FOLDER POPUP MODAL -->
+    <div class="modal-overlay" id="new-folder-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); align-items: center; justify-content: center; z-index: 2000; padding: 1.5rem;">
+        <div class="modal-card" style="max-width: 400px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; border-radius: 16px; background-color: var(--bg-card); border: 1px solid var(--border-light); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06); width: 100%; animation: zoomIn 0.18s ease-out;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; color: var(--accent-color); font-size: 1.25rem;">
+                <i class="fa-solid fa-folder-plus"></i>
+                <h3 style="font-family: 'League Spartan', sans-serif; font-weight: 800; text-transform: uppercase; font-size: 1.15rem; color: var(--text-primary); margin: 0;">Create Folder</h3>
+            </div>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">Enter a name for the new folder to group these memories:</p>
+            <div>
+                <input type="text" id="new-folder-input" placeholder="e.g. Cloud Engineering" style="width: 100%; padding: 0.75rem 1rem; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); color: var(--text-primary); font-size: 0.88rem; outline: none; transition: border-color 0.15s;" onfocus="this.style.borderColor='var(--accent-color)'" onblur="this.style.borderColor='var(--border-light)'">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem;">
+                <button type="button" id="new-folder-modal-cancel" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; transition: background-color 0.15s; background-color: transparent; border: 1px solid var(--border-light); color: var(--text-secondary);">Cancel</button>
+                <button type="button" id="new-folder-modal-submit" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; transition: background-color 0.15s; background-color: var(--accent-color); border: none; color: #ffffff;">Create</button>
+            </div>
+        </div>
+    </div>
+
     <!-- QUICK ACTION DIALOG MODAL -->
     <div class="modal-overlay" id="action-form-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); align-items: center; justify-content: center; z-index: 2000; padding: 1.5rem;">
         <div class="modal-card" style="max-width: 420px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; border-radius: 16px; background-color: var(--bg-card); border: 1px solid var(--border-light); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06); width: 100%; animation: zoomIn 0.18s ease-out;">
@@ -605,7 +623,7 @@
     </div>
 
     <!-- App JavaScript Logic -->
-    <script src="app.js?v=2.0.3"></script>
+    <script src="app.js?v=2.0.4"></script>
 </body>
 </html>
 
