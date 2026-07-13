@@ -487,6 +487,18 @@ def delete_memory(memory_id: str) -> bool:
     return sqlite_success
 
 
+def find_duplicate_memory(content: str, user_phone: str = None) -> dict:
+    """Finds if a memory with exact same content already exists for this user."""
+    try:
+        memories = get_all_memories(user_phone=user_phone)
+        for m in memories:
+            if m.get("content") == content:
+                return m
+    except Exception as e:
+        print(f"[Database] Error checking duplicate memory: {e}")
+    return None
+
+
 def get_memory(memory_id: str) -> dict:
     """Retrieves a single memory by ID."""
     if Config.USE_SUPABASE:

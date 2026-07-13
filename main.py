@@ -201,6 +201,57 @@ async def api_send_message(request: Request):
             response_text = brain.generate_no_results_response(cleaned_query)
             
     else:  # intent == "dump"
+        force_save = data.get("force_save", False)
+        if not force_save:
+            existing = database.find_duplicate_memory(ai_process_text, user_phone=user_phone)
+            if existing:
+                # We pre-calculate what would have been saved so we can pass it to the frontend for replacement
+                brain_data = brain.process_dump(ai_process_text, media_type, timestamp)
+                category = brain_data.get("category", "random_thought")
+                if is_document_upload:
+                    category = "document"
+                summary = brain_data.get("summary", "New Memory")
+                entities = brain_data.get("entities", {})
+                tags = brain_data.get("tags", [])
+                urgency = brain_data.get("urgency", "none")
+                is_business_related = brain_data.get("is_business_related", False)
+                if "is_business_related" in data:
+                    is_business_related = bool(data["is_business_related"])
+                language = brain_data.get("language", "en")
+                response_text = brain_data.get("reply")
+                due_date = brain_data.get("due_date")
+                reminder_status = brain_data.get("reminder_status")
+                if not reminder_status and (category == "task_reminder" or due_date):
+                    reminder_status = "pending"
+                final_folder = document_folder
+                if category == "document" and not final_folder:
+                    final_folder = "Personal"
+                    
+                new_memory_data = {
+                    "content": ai_process_text,
+                    "category": category,
+                    "summary": summary,
+                    "entities": entities,
+                    "tags": tags,
+                    "urgency": urgency,
+                    "is_business_related": is_business_related,
+                    "language": language,
+                    "due_date": due_date,
+                    "reminder_status": reminder_status,
+                    "document_folder": final_folder
+                }
+                
+                return JSONResponse({
+                    "status": "duplicate_detected",
+                    "existing_memory": {
+                        "id": existing.get("id"),
+                        "summary": existing.get("summary"),
+                        "category": existing.get("category"),
+                        "document_folder": existing.get("document_folder")
+                    },
+                    "new_memory_data": new_memory_data
+                })
+
         # Step 2: LLM processing (categorization, entity extraction)
         pipeline_logs.append({"step": "2. AI Processing", "status": "processing", "message": "Categorizing and extracting entities..."})
         brain_data = brain.process_dump(ai_process_text, media_type, timestamp)

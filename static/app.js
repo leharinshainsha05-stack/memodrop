@@ -1741,6 +1741,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     window.loadFoldersView = loadFoldersView;
 
+    function showDuplicateModal(summary) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('duplicate-modal');
+            const summaryLabel = document.getElementById('duplicate-modal-summary');
+            const replaceBtn = document.getElementById('duplicate-modal-replace');
+            const separateBtn = document.getElementById('duplicate-modal-separate');
+            const cancelBtn = document.getElementById('duplicate-modal-cancel');
+            
+            summaryLabel.innerText = summary || 'Untitled Memory';
+            modal.style.display = 'flex';
+            
+            function cleanUp() {
+                modal.style.display = 'none';
+                replaceBtn.removeEventListener('click', onReplace);
+                separateBtn.removeEventListener('click', onSeparate);
+                cancelBtn.removeEventListener('click', onCancel);
+            }
+            
+            function onReplace() {
+                cleanUp();
+                resolve('replace');
+            }
+            
+            function onSeparate() {
+                cleanUp();
+                resolve('separate');
+            }
+            
+            function onCancel() {
+                cleanUp();
+                resolve(null);
+            }
+            
+            replaceBtn.addEventListener('click', onReplace);
+            separateBtn.addEventListener('click', onSeparate);
+            cancelBtn.addEventListener('click', onCancel);
+        });
+    }
+
     function showNewFolderModal() {
         return new Promise((resolve) => {
             const modal = document.getElementById('new-folder-modal');
@@ -2608,6 +2647,100 @@ document.addEventListener('DOMContentLoaded', () => {
                     })
                 });
                 data = await response.json();
+                
+                if (data.status === 'duplicate_detected') {
+                    // Remove the bot loading reply from chat messages thread temporarily
+                    chatMessages = chatMessages.filter(m => m.id !== botReplyId);
+                    renderChat();
+                    
+                    // Open duplicate resolution modal
+                    const choice = await showDuplicateModal(data.existing_memory.summary);
+                    
+                    if (choice === 'replace') {
+                        botReply.content = "Overwriting existing memory...";
+                        chatMessages.push(botReply);
+                        renderChat();
+                        
+                        const updateRes = await fetch(`/api/memories/${data.existing_memory.id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                content: data.new_memory_data.content,
+                                summary: data.new_memory_data.summary,
+                                category: data.new_memory_data.category,
+                                urgency: data.new_memory_data.urgency,
+                                is_business_related: data.new_memory_data.is_business_related,
+                                tags: data.new_memory_data.tags,
+                                language: data.new_memory_data.language,
+                                due_date: data.new_memory_data.due_date,
+                                reminder_status: data.new_memory_data.reminder_status
+                            })
+                        });
+                        const updateData = await updateRes.json();
+                        if (updateRes.ok) {
+                            botReply.content = `🔄 *Replaced existing memory!* Modified **'${data.existing_memory.summary}'** with new contents.`;
+                            memoryCache[data.existing_memory.id] = {
+                                ...data.new_memory_data,
+                                id: data.existing_memory.id,
+                                created_at: new Date().toISOString()
+                            };
+                            refreshAllViews();
+                        } else {
+                            botReply.content = `⚠️ Failed to replace memory: ${updateData.message || 'Unknown error'}`;
+                        }
+                    } else if (choice === 'separate') {
+                        botReply.content = "Saving as separate entry...";
+                        chatMessages.push(botReply);
+                        renderChat();
+                        
+                        const resaveRes = await fetch('/api/send-message', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                message: text,
+                                media_type: "text",
+                                intent: 'dump',
+                                is_business_related: modeToggle.checked,
+                                user_phone: currentUserPhone,
+                                force_save: true
+                            })
+                        });
+                        data = await resaveRes.json();
+                        
+                        let finalId = userMsgId;
+                        if (data.intent === 'dump' && data.extracted && data.extracted.id) {
+                            finalId = data.extracted.id;
+                            userMsg.id = finalId;
+                            userMsg.linkedReplyId = finalId;
+                            
+                            memoryCache[finalId] = {
+                                id: finalId,
+                                content: text,
+                                summary: data.extracted.summary,
+                                category: data.extracted.category,
+                                urgency: data.extracted.urgency,
+                                is_business_related: data.extracted.is_business_related,
+                                tags: data.extracted.tags,
+                                created_at: new Date().toISOString()
+                            };
+                        }
+                        botReply.content = data.response;
+                        botReply.id = finalId;
+                        botReply.category = data.extracted.category;
+                        botReply.summary = data.extracted.summary;
+                        botReply.urgency = data.extracted.urgency;
+                        botReply.tags = data.extracted.tags;
+                        botReply.is_business_related = data.extracted.is_business_related;
+                        refreshAllViews();
+                    } else {
+                        botReply.content = "❌ Discarded duplicate save operation.";
+                        chatMessages.push(botReply);
+                    }
+                    
+                    renderChat();
+                    isManualModeOverride = false;
+                    return; // Stop further execution
+                }
             }
             
             if (isCompare) {
