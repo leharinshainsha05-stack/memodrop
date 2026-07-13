@@ -377,14 +377,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Folder Cards & Folders Back Click Listeners
-    const folderCards = document.querySelectorAll('.folder-card');
-    folderCards.forEach(card => {
-        card.addEventListener('click', () => {
-            const folderName = card.getAttribute('data-folder');
-            openFolder(folderName);
-        });
-    });
 
     const backToFoldersBtn = document.getElementById('back-to-folders-btn');
     if (backToFoldersBtn) {
@@ -1664,6 +1656,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let groupedDocuments = {};
 
     async function loadFoldersView() {
+        const gridContainer = document.getElementById('folders-grid-container');
+        if (gridContainer) {
+            gridContainer.innerHTML = '<div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i> Loading folders...</div>';
+        }
         document.getElementById('folders-index-level').style.display = 'block';
         document.getElementById('folder-contents-level').style.display = 'none';
         
@@ -1673,16 +1669,109 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             groupedDocuments = data.documents || {};
 
-            // Update folder card counters
-            document.getElementById('folder-count-gov').innerText = `${(groupedDocuments['Government & Legal'] || []).length} files`;
-            document.getElementById('folder-count-biz').innerText = `${(groupedDocuments['Business & Finance'] || []).length} files`;
-            document.getElementById('folder-count-acad').innerText = `${(groupedDocuments['Academic & Coursework'] || []).length} files`;
-            document.getElementById('folder-count-personal').innerText = `${(groupedDocuments['Personal'] || []).length} files`;
+            // Ensure standard folders always exist in groupedDocuments (even if empty) to preserve default options
+            const standardFolders = ["Government & Legal", "Business & Finance", "Academic & Coursework", "Personal"];
+            standardFolders.forEach(sf => {
+                if (!groupedDocuments[sf]) {
+                    groupedDocuments[sf] = [];
+                }
+            });
+
+            let html = '';
+            // Sort standard folders first, then custom folders alphabetically
+            const allFolders = Object.keys(groupedDocuments).sort((a, b) => {
+                const aIdx = standardFolders.indexOf(a);
+                const bIdx = standardFolders.indexOf(b);
+                if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+                if (aIdx !== -1) return -1;
+                if (bIdx !== -1) return 1;
+                return a.localeCompare(b);
+            });
+
+            // Folder themes mapper
+            const themes = {
+                "Government & Legal": { icon: "fa-folder-closed", cls: "gov", desc: "Official identity proofs, regulatory documents, certificates, and tax records." },
+                "Business & Finance": { icon: "fa-folder-closed", cls: "biz", desc: "Invoices, quotes, transaction receipts, agreements, and statements." },
+                "Academic & Coursework": { icon: "fa-folder-closed", cls: "acad", desc: "Lecture notes, assignments, university certificates, and syllabus files." },
+                "Personal": { icon: "fa-folder-closed", cls: "personal", desc: "Uncategorized attachments, scanned personal photos, recipes, and notes." }
+            };
+
+            allFolders.forEach(folder => {
+                const count = (groupedDocuments[folder] || []).length;
+                const theme = themes[folder] || { icon: "fa-folder-closed", cls: "custom", desc: "Custom folder created from search results." };
+                
+                html += `
+                    <div class="folder-card" data-folder="${escapeHtml(folder)}" onclick="window.openFolder('${escapeHtml(folder)}')">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="folder-icon-wrapper ${theme.cls}">
+                                <i class="fa-solid ${theme.icon}"></i>
+                            </div>
+                            <span class="count-badge" style="background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">${count} files</span>
+                        </div>
+                        <div>
+                            <h3>${escapeHtml(folder)}</h3>
+                            <p>${escapeHtml(theme.desc)}</p>
+                        </div>
+                        <div class="folder-card-action ${theme.cls}">
+                            Open Folder <i class="fa-solid fa-arrow-right-long"></i>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (gridContainer) {
+                gridContainer.innerHTML = html;
+            }
         } catch (error) {
             console.error('Error loading folders view:', error);
         }
     }
     window.loadFoldersView = loadFoldersView;
+
+    async function convertResultsToFolder(matchedIdsStr) {
+        const folderName = prompt("Enter a name for the new folder:");
+        if (!folderName || !folderName.trim()) return;
+
+        const memoryIds = matchedIdsStr.split(',');
+        try {
+            const response = await fetch('/api/vault/folders/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    memory_ids: memoryIds,
+                    folder_name: folderName.trim()
+                })
+            });
+            const result = await response.json();
+            if (response.ok) {
+                // Refresh local memories state
+                if (window.loadMemories) window.loadMemories();
+                if (window.loadFoldersView) window.loadFoldersView();
+
+                // Append bot message confirmation directly in thread
+                const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const botMsgId = `bot-reply-${Date.now()}`;
+                const confirmationMsg = {
+                    id: botMsgId,
+                    role: 'assistant',
+                    content: `📁 Created folder **'${folderName.trim()}'** containing ${memoryIds.length} documents. You can view it under the **Folders** tab!`,
+                    timestamp: timeNow
+                };
+                
+                // Add to messages and render
+                chatMessages.push(confirmationMsg);
+                renderChat();
+            } else {
+                alert(`Error creating folder: ${result.error || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Error converting to folder:', error);
+            alert('Failed to create folder.');
+        }
+    }
+    window.convertResultsToFolder = convertResultsToFolder;
 
     function openFolder(folderName) {
         const showBusinessMode = modeToggle.checked;
@@ -2259,6 +2348,18 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         `;
                     });
+                }
+                
+                // Append Convert to Folder action if we have multiple search results
+                if (msg.search_results && msg.search_results.length > 1) {
+                    const matchedIds = msg.search_results.map(r => r.id).join(',');
+                    bodyHtml += `
+                        <div style="margin-top: 0.85rem; display: flex; justify-content: flex-end;">
+                            <button class="primary-btn" onclick="window.convertResultsToFolder('${matchedIds}')" style="padding: 0.4rem 0.85rem; font-size: 0.75rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer; background-color: var(--primary-color); border: none; color: #fff; transition: opacity 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                                <i class="fa-solid fa-folder-plus"></i> Convert to Folder
+                            </button>
+                        </div>
+                    `;
                 }
                 
                 // Edit metadata button inside bot replies

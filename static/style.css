@@ -2017,3 +2017,9 @@ body {
 .folder-card-action.biz { color: #34d399; }
 .folder-card-action.acad { color: #fb923c; }
 .folder-card-action.personal { color: #a78bfa; }
+.folder-icon-wrapper.custom {
+    background-color: rgba(236, 72, 153, 0.12);
+    color: #ec4899;
+    border: 1px solid rgba(236, 72, 153, 0.25);
+}
+.folder-card-action.custom { color: #ec4899; }

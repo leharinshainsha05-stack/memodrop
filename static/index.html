@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=League+Spartan:wght@700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=2.0.2">
+    <link rel="stylesheet" href="style.css?v=2.0.3">
 </head>
 <body>
     
@@ -244,74 +244,8 @@
 
                     <!-- FOLDERS INDEX LEVEL (Shown by default) -->
                     <div id="folders-index-level">
-                        <div class="folders-grid">
-                            <!-- Government & Legal Folder Card -->
-                            <div class="folder-card" data-folder="Government & Legal">
-                                <div style="display: flex; align-items: center; justify-content: space-between;">
-                                    <div class="folder-icon-wrapper gov">
-                                        <i class="fa-solid fa-folder-closed"></i>
-                                    </div>
-                                    <span class="count-badge" id="folder-count-gov" style="background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">0 files</span>
-                                </div>
-                                <div>
-                                    <h3>Government & Legal</h3>
-                                    <p>Official identity proofs, regulatory documents, certificates, and tax records.</p>
-                                </div>
-                                <div class="folder-card-action gov">
-                                    Open Folder <i class="fa-solid fa-arrow-right-long"></i>
-                                </div>
-                            </div>
-
-                            <!-- Business & Finance Folder Card -->
-                            <div class="folder-card" data-folder="Business & Finance">
-                                <div style="display: flex; align-items: center; justify-content: space-between;">
-                                    <div class="folder-icon-wrapper biz">
-                                        <i class="fa-solid fa-folder-closed"></i>
-                                    </div>
-                                    <span class="count-badge" id="folder-count-biz" style="background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">0 files</span>
-                                </div>
-                                <div>
-                                    <h3>Business & Finance</h3>
-                                    <p>Invoices, quotes, transaction receipts, agreements, and statements.</p>
-                                </div>
-                                <div class="folder-card-action biz">
-                                    Open Folder <i class="fa-solid fa-arrow-right-long"></i>
-                                </div>
-                            </div>
-
-                            <!-- Academic & Coursework Folder Card -->
-                            <div class="folder-card" data-folder="Academic & Coursework">
-                                <div style="display: flex; align-items: center; justify-content: space-between;">
-                                    <div class="folder-icon-wrapper acad">
-                                        <i class="fa-solid fa-folder-closed"></i>
-                                    </div>
-                                    <span class="count-badge" id="folder-count-acad" style="background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">0 files</span>
-                                </div>
-                                <div>
-                                    <h3>Academic & Coursework</h3>
-                                    <p>Lecture notes, assignments, university certificates, and syllabus files.</p>
-                                </div>
-                                <div class="folder-card-action acad">
-                                    Open Folder <i class="fa-solid fa-arrow-right-long"></i>
-                                </div>
-                            </div>
-
-                            <!-- Personal Folder Card -->
-                            <div class="folder-card" data-folder="Personal">
-                                <div style="display: flex; align-items: center; justify-content: space-between;">
-                                    <div class="folder-icon-wrapper personal">
-                                        <i class="fa-solid fa-folder-closed"></i>
-                                    </div>
-                                    <span class="count-badge" id="folder-count-personal" style="background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700;">0 files</span>
-                                </div>
-                                <div>
-                                    <h3>Personal</h3>
-                                    <p>Uncategorized attachments, scanned personal photos, recipes, and notes.</p>
-                                </div>
-                                <div class="folder-card-action personal">
-                                    Open Folder <i class="fa-solid fa-arrow-right-long"></i>
-                                </div>
-                            </div>
+                        <div class="folders-grid" id="folders-grid-container">
+                            <!-- Rendered dynamically from app.js -->
                         </div>
                     </div>
 
@@ -671,7 +605,7 @@
     </div>
 
     <!-- App JavaScript Logic -->
-    <script src="app.js?v=2.0.2"></script>
+    <script src="app.js?v=2.0.3"></script>
 </body>
 </html>
 

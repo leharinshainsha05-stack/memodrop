@@ -390,6 +390,7 @@ async def api_get_vault_documents(user_phone: str = None, is_business: bool = No
     try:
         memories = database.get_all_memories(category="document", user_phone=user_phone)
         
+        # Start with standard folders to keep them in output even if empty
         grouped = {
             "Government & Legal": [],
             "Business & Finance": [],
@@ -405,7 +406,7 @@ async def api_get_vault_documents(user_phone: str = None, is_business: bool = No
                     
             folder = m.get("document_folder") or "Personal"
             if folder not in grouped:
-                folder = "Personal"
+                grouped[folder] = []
             grouped[folder].append(m)
             
         return JSONResponse({
@@ -415,6 +416,49 @@ async def api_get_vault_documents(user_phone: str = None, is_business: bool = No
     except Exception as e:
         print(f"[API] Error getting vault documents: {e}")
         return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@app.post("/api/vault/folders/create")
+@app.post("/vault/folders/create")
+async def api_convert_to_folder(request: Request):
+    """
+    Batch updates multiple memories to be categorized as 'document' and sets their document_folder.
+    """
+    try:
+        data = await request.json()
+        memory_ids = data.get("memory_ids", [])
+        folder_name = data.get("folder_name", "").strip()
+        
+        if not folder_name:
+            return JSONResponse({"error": "Folder name cannot be empty"}, status_code=400)
+            
+        print(f"[API] Converting memories {memory_ids} to folder '{folder_name}'")
+        for mid in memory_ids:
+            mem = database.get_memory(mid)
+            if mem:
+                entities = mem.get("entities") or {}
+                entities["document_folder"] = folder_name
+                
+                database.update_memory(
+                    memory_id=mid,
+                    content=mem.get("content"),
+                    summary=mem.get("summary"),
+                    category="document",  # Force category to document to fit folder grouping
+                    entities=entities,
+                    tags=mem.get("tags"),
+                    urgency=mem.get("urgency"),
+                    is_business_related=mem.get("is_business_related"),
+                    embedding=None,  # Keep existing embedding
+                    language=mem.get("language"),
+                    due_date=mem.get("due_date"),
+                    reminder_status=mem.get("reminder_status"),
+                    document_folder=folder_name
+                )
+        return JSONResponse({"status": "success", "message": f"Successfully created folder '{folder_name}'"})
+    except Exception as e:
+        print(f"[API] Error converting to folder: {e}")
+        return JSONResponse({"error": str(e)}, status_code=500)
+
 
 
 @app.get("/api/vault/insights")
