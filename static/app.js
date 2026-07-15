@@ -3847,6 +3847,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // Expose due reminders checker to other parts
     window.checkDueReminders = checkDueReminders;
 
+    function handleSharedText() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const shareText = urlParams.get('share_text');
+        if (shareText) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            // Switch composer mode to "save"
+            const saveTabBtn = document.getElementById('composer-mode-save');
+            if (saveTabBtn) {
+                saveTabBtn.click();
+            } else {
+                currentComposerMode = 'save';
+                if (window.updateComposerUI) window.updateComposerUI();
+            }
+            
+            if (chatInput) {
+                chatInput.value = shareText;
+                chatInput.focus();
+                // Trigger auto resize event if input element has it
+                chatInput.dispatchEvent(new Event('input'));
+            }
+            
+            showCustomAlert("Captured Shared Info", "Shared content has been loaded into your composer! Click the send button to save it.");
+        }
+    }
+
     function initLoginSystem() {
         if (!currentUserPhone) {
             showLoginModal();
@@ -3854,6 +3880,15 @@ document.addEventListener('DOMContentLoaded', () => {
             renderHeaderUserSection();
             loadMemories();
             updateStorageUsage();
+            handleSharedText();
         }
+    }
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(reg => console.log('Service Worker registered successfully:', reg.scope))
+                .catch(err => console.log('Service Worker registration failed:', err));
+        });
     }
 });

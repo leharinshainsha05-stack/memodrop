@@ -531,6 +531,25 @@ async def api_verify_otp(request: Request):
         return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
 
 
+@app.get("/share-target")
+async def api_share_target(title: str = "", text: str = "", url: str = ""):
+    from fastapi.responses import RedirectResponse
+    import urllib.parse
+    
+    parts = []
+    if title:
+        parts.append(title)
+    if text:
+        parts.append(text)
+    if url:
+        parts.append(url)
+        
+    shared_content = " ".join(parts).strip()
+    encoded_content = urllib.parse.quote(shared_content)
+    
+    return RedirectResponse(url=f"/?share_text={encoded_content}")
+
+
 @app.post("/api/vault/folders/create")
 @app.post("/vault/folders/create")
 async def api_convert_to_folder(request: Request):
