@@ -231,11 +231,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Expose document viewer helper
     window.openTextDocumentViewer = async function(filename, data) {
-        const activeFolderContainer = document.getElementById('folder-contents-level');
-        const activeFolderNameElement = document.getElementById('active-folder-name');
-        const activeFolderName = activeFolderNameElement ? activeFolderNameElement.innerText : '';
+        let isGovernmentDoc = false;
         
-        if (activeFolderContainer && activeFolderContainer.style.display === 'block' && activeFolderName === 'Government & Legal') {
+        // 1. Search in allMemories list
+        const matchingMemory = allMemories.find(m => {
+            return m.content.includes(filename) || (data && data.length > 50 && m.content.includes(data.substring(0, 50)));
+        });
+        
+        if (matchingMemory && matchingMemory.document_folder && matchingMemory.document_folder.toLowerCase() === 'government & legal') {
+            isGovernmentDoc = true;
+        }
+        
+        // 2. Fallback to active folder level check
+        if (!isGovernmentDoc) {
+            const activeFolderContainer = document.getElementById('folder-contents-level');
+            const activeFolderNameElement = document.getElementById('active-folder-name');
+            const activeFolderName = activeFolderNameElement ? activeFolderNameElement.innerText.trim() : '';
+            if (activeFolderContainer && activeFolderContainer.style.display === 'block' && activeFolderName.toLowerCase() === 'government & legal') {
+                isGovernmentDoc = true;
+            }
+        }
+        
+        if (isGovernmentDoc) {
             const verified = await requestOtpVerification();
             if (!verified) {
                 return;
