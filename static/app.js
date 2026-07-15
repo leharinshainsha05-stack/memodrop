@@ -265,9 +265,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const viewer = document.createElement('div');
-        viewer.style = "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 2rem;";
+        viewer.style = "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 10000; display: flex; align-items: center; justify-content: center;";
         viewer.innerHTML = `
-            <div style="background: #111318; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; width: 100%; max-width: 500px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <div class="modal-card" style="background: #111318; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; width: 100%; max-width: 500px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 1.05rem; color: #ffffff; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">${filename}</span>
                     <button style="background: transparent; border: none; color: #8B8F9C; cursor: pointer; font-size: 1.1rem;" onclick="this.closest('.modal-overlay').remove()"><i class="fa-solid fa-xmark"></i></button>

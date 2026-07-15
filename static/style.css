@@ -2025,3 +2025,39 @@ body {
     border: 1px solid rgba(236, 72, 153, 0.25);
 }
 .folder-card-action.custom { color: #ec4899; }
+
+/* Responsive adjustments for Storage Billing and Security OTP Modals */
+@media (max-width: 480px) {
+    .modal-overlay {
+        padding: 0.75rem !important;
+    }
+    
+    .modal-card {
+        padding: 1.25rem !important;
+        gap: 1rem !important;
+    }
+    
+    /* OTP Modal mobile scaling */
+    .otp-digit-input {
+        width: 36px !important;
+        height: 42px !important;
+        font-size: 1.15rem !important;
+    }
+    
+    #otp-input-container {
+        gap: 0.35rem !important;
+    }
+    
+    /* Billing Modal plan cards wrap */
+    .billing-plan-item {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.75rem !important;
+        text-align: left;
+    }
+    
+    .billing-plan-item button {
+        width: 100% !important;
+        padding: 0.55rem 0 !important;
+    }
+}
