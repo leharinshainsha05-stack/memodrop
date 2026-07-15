@@ -228,7 +228,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Expose document viewer helper
-    window.openTextDocumentViewer = function(filename, data) {
+    window.openTextDocumentViewer = async function(filename, data) {
+        const activeFolderContainer = document.getElementById('folder-contents-level');
+        const activeFolderNameElement = document.getElementById('active-folder-name');
+        const activeFolderName = activeFolderNameElement ? activeFolderNameElement.innerText : '';
+        
+        if (activeFolderContainer && activeFolderContainer.style.display === 'block' && activeFolderName === 'Government & Legal') {
+            const verified = await requestOtpVerification();
+            if (!verified) {
+                return;
+            }
+        }
+
         let displayContent = data;
         if (data.startsWith('data:')) {
             displayContent = `[Base64 Attachment Data file: ${filename}]\n\nClick the link to download or open locally in your browser.`;
@@ -1777,6 +1788,138 @@ document.addEventListener('DOMContentLoaded', () => {
             
             replaceBtn.addEventListener('click', onReplace);
             separateBtn.addEventListener('click', onSeparate);
+            cancelBtn.addEventListener('click', onCancel);
+        });
+    }
+
+    function requestOtpVerification() {
+        return new Promise(async (resolve) => {
+            const modal = document.getElementById('otp-modal');
+            const phoneLabel = document.getElementById('otp-modal-phone');
+            const verifyBtn = document.getElementById('otp-modal-verify');
+            const resendBtn = document.getElementById('otp-modal-resend');
+            const cancelBtn = document.getElementById('otp-modal-cancel');
+            const inputs = document.querySelectorAll('.otp-digit-input');
+            const simulateWrapper = document.getElementById('otp-simulate-wrapper');
+            const simulateCode = document.getElementById('otp-simulate-code');
+            
+            const userPhone = currentUserPhone || '7010231101';
+            phoneLabel.innerText = `+91 ${userPhone}`;
+            
+            inputs.forEach(input => input.value = '');
+            modal.style.display = 'flex';
+            inputs[0].focus();
+            
+            let simulatedOtp = '';
+            
+            async function triggerSendOtp() {
+                try {
+                    const res = await fetch('/api/otp/send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ phone: userPhone })
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        simulatedOtp = data.code_debug_simulate;
+                        if (simulateWrapper && simulateCode) {
+                            simulateCode.innerText = simulatedOtp;
+                            simulateWrapper.style.display = 'block';
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error sending OTP:", err);
+                }
+            }
+            
+            await triggerSendOtp();
+            
+            // Auto focus jumping listeners
+            inputs.forEach((input, idx) => {
+                input.addEventListener('input', (e) => {
+                    input.value = input.value.replace(/[^0-9]/g, '');
+                    if (input.value.length === 1 && idx < inputs.length - 1) {
+                        inputs[idx + 1].focus();
+                    }
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && input.value.length === 0 && idx > 0) {
+                        inputs[idx - 1].focus();
+                    }
+                });
+                
+                input.addEventListener('focus', () => {
+                    input.style.borderColor = 'var(--accent-color)';
+                });
+                input.addEventListener('blur', () => {
+                    input.style.borderColor = 'var(--border-light)';
+                });
+            });
+            
+            function onAutofillClick() {
+                if (simulatedOtp && simulatedOtp.length === 6) {
+                    inputs.forEach((input, idx) => {
+                        input.value = simulatedOtp[idx];
+                    });
+                    inputs[5].focus();
+                }
+            }
+            if (simulateCode) {
+                simulateCode.addEventListener('click', onAutofillClick);
+            }
+            
+            async function onVerify() {
+                let code = '';
+                inputs.forEach(input => code += input.value);
+                if (code.length !== 6) {
+                    showCustomAlert("Invalid Code", "Please enter all 6 digits of the verification code.");
+                    return;
+                }
+                
+                try {
+                    const res = await fetch('/api/otp/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ phone: userPhone, code: code })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        cleanUp();
+                        resolve(true);
+                    } else {
+                        showCustomAlert("Verification Failed", data.message || "The code entered is incorrect.");
+                    }
+                } catch (err) {
+                    console.error("Error verifying OTP:", err);
+                    showCustomAlert("Verification Error", "An error occurred while connecting to the verification server.");
+                }
+            }
+            
+            function onResend() {
+                inputs.forEach(input => input.value = '');
+                inputs[0].focus();
+                triggerSendOtp();
+                showCustomAlert("OTP Resent", "A new 6-digit verification code has been sent.");
+            }
+            
+            function onCancel() {
+                cleanUp();
+                resolve(false);
+            }
+            
+            function cleanUp() {
+                modal.style.display = 'none';
+                verifyBtn.removeEventListener('click', onVerify);
+                resendBtn.removeEventListener('click', onResend);
+                cancelBtn.removeEventListener('click', onCancel);
+                if (simulateCode) {
+                    simulateCode.removeEventListener('click', onAutofillClick);
+                }
+            }
+            
+            verifyBtn.addEventListener('click', onVerify);
+            resendBtn.addEventListener('click', onResend);
             cancelBtn.addEventListener('click', onCancel);
         });
     }

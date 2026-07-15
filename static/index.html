@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=League+Spartan:wght@700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=2.0.9">
+    <link rel="stylesheet" href="style.css?v=2.1.0">
 </head>
 <body>
     
@@ -480,6 +480,48 @@
         </div>
     </div>
 
+    <!-- OTP SECURITY VERIFICATION MODAL -->
+    <div class="modal-overlay" id="otp-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.7); align-items: center; justify-content: center; z-index: 3000; padding: 1.5rem;">
+        <div class="modal-card" style="max-width: 400px; padding: 2rem; display: flex; flex-direction: column; gap: 1.25rem; border-radius: 20px; background-color: var(--bg-card); border: 1px solid var(--border-light); box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45); width: 100%; text-align: center; animation: zoomIn 0.18s ease-out;">
+            <!-- Icon -->
+            <div style="width: 60px; height: 60px; border-radius: 50%; background-color: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.2); display: flex; align-items: center; justify-content: center; margin: 0 auto; color: #fbbf24; font-size: 1.5rem;">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            
+            <div>
+                <h3 style="font-family: 'League Spartan', sans-serif; font-weight: 800; text-transform: uppercase; font-size: 1.25rem; color: var(--text-primary); margin: 0 0 0.5rem 0;">Security Verification</h3>
+                <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+                    A 6-digit verification code has been sent to your registered number: <strong id="otp-modal-phone" style="color: var(--text-primary);">+91 7010231101</strong>.
+                </p>
+            </div>
+            
+            <!-- OTP digit Inputs -->
+            <div style="display: flex; gap: 0.5rem; justify-content: center; margin: 0.5rem 0;" id="otp-input-container">
+                <input type="text" maxlength="1" class="otp-digit-input" style="width: 42px; height: 48px; border-radius: 8px; border: 1px solid var(--border-light); background: rgba(255,255,255,0.02); color: #ffffff; text-align: center; font-size: 1.25rem; font-weight: 700; outline: none; transition: border-color 0.15s;" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                <input type="text" maxlength="1" class="otp-digit-input" style="width: 42px; height: 48px; border-radius: 8px; border: 1px solid var(--border-light); background: rgba(255,255,255,0.02); color: #ffffff; text-align: center; font-size: 1.25rem; font-weight: 700; outline: none; transition: border-color 0.15s;" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                <input type="text" maxlength="1" class="otp-digit-input" style="width: 42px; height: 48px; border-radius: 8px; border: 1px solid var(--border-light); background: rgba(255,255,255,0.02); color: #ffffff; text-align: center; font-size: 1.25rem; font-weight: 700; outline: none; transition: border-color 0.15s;" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                <input type="text" maxlength="1" class="otp-digit-input" style="width: 42px; height: 48px; border-radius: 8px; border: 1px solid var(--border-light); background: rgba(255,255,255,0.02); color: #ffffff; text-align: center; font-size: 1.25rem; font-weight: 700; outline: none; transition: border-color 0.15s;" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                <input type="text" maxlength="1" class="otp-digit-input" style="width: 42px; height: 48px; border-radius: 8px; border: 1px solid var(--border-light); background: rgba(255,255,255,0.02); color: #ffffff; text-align: center; font-size: 1.25rem; font-weight: 700; outline: none; transition: border-color 0.15s;" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                <input type="text" maxlength="1" class="otp-digit-input" style="width: 42px; height: 48px; border-radius: 8px; border: 1px solid var(--border-light); background: rgba(255,255,255,0.02); color: #ffffff; text-align: center; font-size: 1.25rem; font-weight: 700; outline: none; transition: border-color 0.15s;" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+            </div>
+
+            <!-- Simulation auto-fill helper -->
+            <div id="otp-simulate-wrapper" style="display: none; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">
+                Simulation Helper Code: <strong style="color: #60a5fa; cursor: pointer; text-decoration: underline;" id="otp-simulate-code">------</strong> (click to autofill)
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+                <button type="button" id="otp-modal-verify" style="width: 100%; padding: 0.75rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 10px; cursor: pointer; transition: background-color 0.15s; background-color: var(--accent-color); border: none; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                    Verify & Unlock
+                </button>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 0.25rem;">
+                    <button type="button" id="otp-modal-resend" style="background: transparent; border: none; color: #60a5fa; font-size: 0.78rem; font-weight: 600; cursor: pointer; padding: 0.25rem 0; outline: none;">Resend OTP</button>
+                    <button type="button" id="otp-modal-cancel" style="background: transparent; border: none; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; cursor: pointer; padding: 0.25rem 0; outline: none;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- QUICK ACTION DIALOG MODAL -->
     <div class="modal-overlay" id="action-form-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); align-items: center; justify-content: center; z-index: 2000; padding: 1.5rem;">
         <div class="modal-card" style="max-width: 420px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; border-radius: 16px; background-color: var(--bg-card); border: 1px solid var(--border-light); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06); width: 100%; animation: zoomIn 0.18s ease-out;">
@@ -726,7 +768,7 @@
     </div>
 
     <!-- App JavaScript Logic -->
-    <script src="app.js?v=2.0.9"></script>
+    <script src="app.js?v=2.1.0"></script>
 </body>
 </html>
 
