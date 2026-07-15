@@ -197,9 +197,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const isPdf = attachment.filename && attachment.filename.toLowerCase().endsWith('.pdf');
             const fileBg = isPdf ? '#f87171' : '#60a5fa';
             const fileIcon = isPdf ? 'fa-file-pdf' : 'fa-file-invoice';
+            const escapedFilename = (attachment.filename || '').replace(/'/g, "\\'");
+            const escapedData = (attachment.data || '').replace(/'/g, "\\'");
             return `
                 <div class="attachment-document-bubble" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.35rem; width: 260px; max-width: 100%; margin-top: 0.2rem;">
-                    <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); width: 100%;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); width: 100%; cursor: pointer; transition: background-color 0.15s, border-color 0.15s;" onclick="window.openTextDocumentViewer('${escapedFilename}', '${escapedData}')" title="View Document" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.06)'; this.style.borderColor='rgba(255,255,255,0.12)';" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.08)';">
                         <div style="width: 36px; height: 36px; border-radius: 6px; background: ${fileBg}; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 1.15rem; flex-shrink: 0;">
                             <i class="fa-solid ${fileIcon}"></i>
                         </div>
@@ -207,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span style="font-size: 0.82rem; font-weight: 700; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${attachment.filename}">${attachment.filename}</span>
                             <span style="font-size: 0.68rem; color: #8B8F9C;">${attachment.size || 'Document'}</span>
                         </div>
-                        <div style="flex-shrink: 0; color: #8B8F9C; cursor: pointer; padding: 0.25rem;" onclick="window.openTextDocumentViewer('${attachment.filename}', '${attachment.data}')" title="View Document">
+                        <div style="flex-shrink: 0; color: #8B8F9C; padding: 0.25rem;">
                             <i class="fa-solid fa-arrow-down-to-bracket" style="font-size: 0.85rem; color: #60a5fa;"></i>
                         </div>
                     </div>
