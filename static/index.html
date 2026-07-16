@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=League+Spartan:wght@700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=2.1.3">
+    <link rel="stylesheet" href="style.css?v=2.2.0">
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -18,31 +18,52 @@
     <!-- Main App Layout Shell -->
     <div class="app-layout">
         
-        <!-- SIDEBAR: Slim Icon Navigation -->
-        <aside class="app-sidebar">
-            <div class="sidebar-logo">
-                <i class="fa-solid fa-brain"></i>
+        <!-- SIDEBAR: Curved Icon Navigation -->
+        <aside class="app-sidebar curved-sidebar-container">
+            <svg class="sidebar-curve-svg" viewBox="0 0 100 800" preserveAspectRatio="none">
+                <path d="M10,20 Q110,400 10,780" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.5" />
+            </svg>
+            <div class="sidebar-logo" style="margin-top: 1.5rem; margin-bottom: 2rem; position: relative; z-index: 10;">
+                <i class="fa-solid fa-droplet" style="color: var(--accent-peach);"></i>
             </div>
-            <nav class="sidebar-nav">
-                <button class="nav-item active" id="nav-chat-btn" title="Chat Interface">
-                    <i class="fa-solid fa-message"></i>
+            
+            <div class="sidebar-nav-items">
+                <!-- Home button (at the peak of the curve) -->
+                <button class="nav-item active" id="nav-home-btn" title="Dashboard Home" style="position: absolute; top: 12%; left: 32px;">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Home</span>
+                </button>
+                
+                <!-- Chat/Brain button -->
+                <button class="nav-item" id="nav-chat-btn" title="Chat Interface" style="position: absolute; top: 27%; left: 45px;">
+                    <i class="fa-solid fa-comments"></i>
                     <span>Chat</span>
                 </button>
-                <button class="nav-item" id="nav-vault-btn" title="Memory Vault">
-                    <i class="fa-solid fa-vault"></i>
-                    <span>Vault</span>
-                </button>
-                <button class="nav-item" id="nav-folders-btn" title="Document Folders">
+                
+                <!-- Folder button -->
+                <button class="nav-item" id="nav-folders-btn" title="Document Folders" style="position: absolute; top: 42%; left: 48px;">
                     <i class="fa-solid fa-folder"></i>
                     <span>Folders</span>
                 </button>
-            </nav>
-            <div class="sidebar-footer" style="display: flex; flex-direction: column; gap: 0.75rem; align-items: center; width: 100%;">
-                <button class="nav-item-icon" id="sidebar-storage-btn" title="Storage Usage" style="position: relative; transition: color 0.15s, transform 0.15s;">
-                    <i class="fa-solid fa-cloud"></i>
-                    <div id="sidebar-storage-dot" style="position: absolute; bottom: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background-color: #22c55e; border: 2px solid var(--bg-sidebar);"></div>
+                
+                <!-- Notifications/Alerts button -->
+                <button class="nav-item" id="nav-vault-btn" title="Memory Vault" style="position: absolute; top: 57%; left: 45px;">
+                    <i class="fa-solid fa-vault"></i>
+                    <span>Vault</span>
                 </button>
-                <button class="nav-item-icon" title="Settings"><i class="fa-solid fa-sliders"></i></button>
+                
+                <!-- Settings button -->
+                <button class="nav-item" id="sidebar-storage-btn" title="Storage & Settings" style="position: absolute; top: 72%; left: 32px;">
+                    <i class="fa-solid fa-sliders"></i>
+                    <div id="sidebar-storage-dot" style="position: absolute; top: 0; right: 0; width: 8px; height: 8px; border-radius: 50%; background-color: #22c55e; border: 1.5px solid var(--bg-sidebar);"></div>
+                    <span>Limits</span>
+                </button>
+                
+                <!-- Crescent moon dark mode button -->
+                <button class="nav-item" id="sidebar-theme-btn" title="Theme Toggle" style="position: absolute; top: 87%; left: 12px;">
+                    <i class="fa-solid fa-moon"></i>
+                    <span>Theme</span>
+                </button>
             </div>
         </aside>
 
@@ -51,27 +72,111 @@
             
             <!-- TOP BAR: Navigation and Mode Toggle -->
             <header class="app-topbar">
-                <div class="topbar-left">
-                    <div class="topbar-logo-chip" style="width: 32px; height: 32px; background-color: #ffffff; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #111318; font-size: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-right: 0.5rem; flex-shrink: 0;">
-                        <i class="fa-solid fa-brain"></i>
+                <div class="topbar-left" style="display: flex; flex-direction: column; gap: 0.1rem; align-items: flex-start; justify-content: center;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #ff6b4a, #d946ef); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 0.85rem;">
+                            <i class="fa-solid fa-droplet"></i>
+                        </div>
+                        <span class="topbar-logo-wordmark" style="color: var(--text-primary); font-family: 'League Spartan', sans-serif; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.01em; text-transform: uppercase;">MemoDrop</span>
                     </div>
-                    <span class="topbar-logo-wordmark" style="color: var(--text-primary); font-family: 'League Spartan', sans-serif; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em;">MemoDrop</span>
+                    <span style="font-size: 0.65rem; color: var(--text-secondary); letter-spacing: 0.05em; font-weight: 600; margin-left: 1.8rem;">YOUR SECOND BRAIN</span>
                 </div>
                 
-                <div class="topbar-right">
-                    <button class="nav-item-icon" title="Menu" style="color: var(--text-secondary); background: transparent; border: none; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; transition: color 0.15s, background-color 0.15s;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="14" width="7" height="7"></rect>
-                            <rect x="3" y="14" width="7" height="7"></rect>
-                        </svg>
+                <div style="display: flex; gap: 1.25rem; font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.15em; font-family: 'Inter', sans-serif; align-items: center; position: absolute; left: 50%; transform: translateX(-50%);">
+                    <span style="color: var(--text-primary); border-bottom: 2px solid var(--accent-peach); padding-bottom: 0.15rem;">MIND</span>
+                    <span>CAPTURE</span>
+                    <span>ORGANIZE</span>
+                    <span>REMEMBER</span>
+                </div>
+                
+                <div class="topbar-right" style="display: flex; align-items: center; gap: 0.85rem;">
+                    <div style="display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.85rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: #ffffff; cursor: pointer;">
+                        <i class="fa-solid fa-leaf" style="color: #c084fc; font-size: 0.75rem;"></i>
+                        <span>Personal</span>
+                        <i class="fa-solid fa-chevron-down" style="font-size: 0.6rem; color: var(--text-secondary);"></i>
+                    </div>
+                    
+                    <button class="nav-item-icon" title="Calendar" style="color: var(--text-secondary); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px;">
+                        <i class="fa-regular fa-calendar-days"></i>
                     </button>
+                    
+                    <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; border: 1.5px solid rgba(255,255,255,0.12); flex-shrink: 0;">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
                 </div>
             </header>
 
+            <!-- VIEW H: COSMIC HOME DASHBOARD -->
+            <section class="app-view active" id="view-home">
+                <div class="cosmic-home-wrapper">
+                    <div class="cosmic-dashboard-left">
+                        <div class="cosmic-title-section">
+                            <h1>Drop today, find <span>forever.</span></h1>
+                            <p>Your personal knowledge, beautifully organized by AI.</p>
+                        </div>
+                        
+                        <div class="orbit-system-container">
+                            <div class="central-orb-glow"></div>
+                            <div class="central-orb" id="cosmic-central-orb" title="Click to refresh latest memories"></div>
+                            
+                            <div class="orbit-ring orbit-ring-1"></div>
+                            <div class="orbit-ring orbit-ring-2"></div>
+                            <div class="orbit-ring orbit-ring-3"></div>
+                            
+                            <div id="orbit-nodes-container" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 10;"></div>
+                        </div>
+                        
+                        <div class="cosmic-capture-section">
+                            <div class="cosmic-capture-bar">
+                                <button type="button" class="cosmic-action-btn add" id="cosmic-capture-add" title="Upload document / file"><i class="fa-solid fa-plus"></i></button>
+                                <input type="text" class="cosmic-capture-input" id="cosmic-capture-input" placeholder="Capture a memory...">
+                                <button type="button" class="cosmic-action-btn mic" id="cosmic-capture-voice" title="Speech to text"><i class="fa-solid fa-microphone"></i></button>
+                                <button type="button" class="cosmic-action-btn send" id="cosmic-capture-submit" title="Save memory"><i class="fa-solid fa-arrow-up"></i></button>
+                            </div>
+                            <div class="cosmic-footer-quote">"Small drops. Big clarity."</div>
+                        </div>
+                    </div>
+                    
+                    <div class="cosmic-brain-panel">
+                        <h3>Your Brain</h3>
+                        
+                        <div class="cosmic-stat-item">
+                            <div class="cosmic-stat-icon memories"><i class="fa-solid fa-brain"></i></div>
+                            <div class="cosmic-stat-info">
+                                <span class="cosmic-stat-value" id="stat-memories-count">0</span>
+                                <span class="cosmic-stat-label">Memories</span>
+                            </div>
+                        </div>
+                        
+                        <div class="cosmic-stat-item">
+                            <div class="cosmic-stat-icon docs"><i class="fa-solid fa-file-lines"></i></div>
+                            <div class="cosmic-stat-info">
+                                <span class="cosmic-stat-value" id="stat-docs-count">0</span>
+                                <span class="cosmic-stat-label">Documents</span>
+                            </div>
+                        </div>
+                        
+                        <div class="cosmic-stat-item">
+                            <div class="cosmic-stat-icon voice"><i class="fa-solid fa-microphone-lines"></i></div>
+                            <div class="cosmic-stat-info">
+                                <span class="cosmic-stat-value" id="stat-voice-count">0</span>
+                                <span class="cosmic-stat-label">Voice Notes</span>
+                            </div>
+                        </div>
+                        
+                        <div class="cosmic-stat-item">
+                            <div class="cosmic-stat-icon reminders"><i class="fa-solid fa-bell"></i></div>
+                            <div class="cosmic-stat-info">
+                                <span class="cosmic-stat-value" id="stat-reminders-count">0</span>
+                                <span class="cosmic-stat-label">Reminders</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- VIEW A: CHAT APPLICATION SCREEN -->
-            <section class="app-view active" id="view-chat">
+            <section class="app-view" id="view-chat">
                 <!-- Floating Doodle Accents in Chat Empty Spaces (Never overlapping content) -->
                 <div class="chat-doodles">
                     <svg class="doodle-svg squiggle" width="50" height="15" viewBox="0 0 50 15" fill="none">
@@ -769,6 +874,6 @@
     </div>
 
     <!-- App JavaScript Logic -->
-    <script src="app.js?v=2.1.3"></script>
+    <script src="app.js?v=2.2.0"></script>
 </body>
 </html>

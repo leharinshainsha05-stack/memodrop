@@ -16,9 +16,11 @@ const MOCK_SCREENSHOTS = {
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Navigation Elements ---
+    const navHomeBtn = document.getElementById('nav-home-btn');
     const navChatBtn = document.getElementById('nav-chat-btn');
     const navVaultBtn = document.getElementById('nav-vault-btn');
     const navFoldersBtn = document.getElementById('nav-folders-btn');
+    const viewHome = document.getElementById('view-home');
     const viewChat = document.getElementById('view-chat');
     const viewVault = document.getElementById('view-vault');
     const viewFolders = document.getElementById('view-folders');
@@ -349,6 +351,12 @@ document.addEventListener('DOMContentLoaded', () => {
     window.showCustomAlert = showCustomAlert;
 
     // --- Navigation Listeners ---
+    if (navHomeBtn) {
+        navHomeBtn.addEventListener('click', () => {
+            switchView('home');
+        });
+    }
+
     navChatBtn.addEventListener('click', () => {
         switchView('chat');
     });
@@ -363,48 +371,244 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Logo click redirects to Chat view (Home Page)
+    // Logo click redirects to Home Dashboard (Home Page)
     const topbarLogo = document.querySelector('.topbar-left');
     const sidebarLogo = document.querySelector('.sidebar-logo');
     if (topbarLogo) {
         topbarLogo.style.cursor = 'pointer';
         topbarLogo.addEventListener('click', () => {
-            switchView('chat');
+            switchView('home');
         });
     }
     if (sidebarLogo) {
         sidebarLogo.style.cursor = 'pointer';
         sidebarLogo.addEventListener('click', () => {
-            switchView('chat');
+            switchView('home');
         });
     }
 
     function switchView(viewName) {
-        if (viewName === 'chat') {
+        // Reset all navigation active states
+        if (navHomeBtn) navHomeBtn.classList.remove('active');
+        navChatBtn.classList.remove('active');
+        navVaultBtn.classList.remove('active');
+        if (navFoldersBtn) navFoldersBtn.classList.remove('active');
+        
+        // Reset all view active classes
+        if (viewHome) viewHome.classList.remove('active');
+        viewChat.classList.remove('active');
+        viewVault.classList.remove('active');
+        if (viewFolders) viewFolders.classList.remove('active');
+        
+        if (viewName === 'home') {
+            if (navHomeBtn) navHomeBtn.classList.add('active');
+            if (viewHome) viewHome.classList.add('active');
+            updateCosmicDashboard();
+        } else if (viewName === 'chat') {
             navChatBtn.classList.add('active');
-            navVaultBtn.classList.remove('active');
-            if (navFoldersBtn) navFoldersBtn.classList.remove('active');
             viewChat.classList.add('active');
-            viewVault.classList.remove('active');
-            if (viewFolders) viewFolders.classList.remove('active');
-            renderChat(); // Re-render chat layout on load
+            renderChat();
         } else if (viewName === 'vault') {
             navVaultBtn.classList.add('active');
-            navChatBtn.classList.remove('active');
-            if (navFoldersBtn) navFoldersBtn.classList.remove('active');
             viewVault.classList.add('active');
-            viewChat.classList.remove('active');
-            if (viewFolders) viewFolders.classList.remove('active');
-            loadMemories(); // Refresh when opening vault
+            loadMemories();
         } else if (viewName === 'folders') {
             if (navFoldersBtn) navFoldersBtn.classList.add('active');
-            navChatBtn.classList.remove('active');
-            navVaultBtn.classList.remove('active');
             if (viewFolders) viewFolders.classList.add('active');
-            viewChat.classList.remove('active');
-            viewVault.classList.remove('active');
-            loadFoldersView(); // Refresh and load folders view contents
+            loadFoldersView();
         }
+    }
+
+    // --- Cosmic Dashboard Core Logic ---
+    function updateCosmicDashboard() {
+        const totalMemories = allMemories.length;
+        const totalDocs = allMemories.filter(m => {
+            const content = m.content.toLowerCase();
+            return m.category === 'document' || content.includes('[document attachment]') || content.includes('aadhar.pdf');
+        }).length;
+        const totalVoice = allMemories.filter(m => {
+            const content = m.content.toLowerCase();
+            return m.category === 'voice' || m.category === 'audio' || content.includes('[audio attachment]') || content.includes('[voice attachment]');
+        }).length;
+        const totalReminders = allMemories.filter(m => {
+            return m.category === 'reminder' || m.category === 'task_reminder' || m.reminder_time;
+        }).length;
+        
+        const mCount = document.getElementById('stat-memories-count');
+        const dCount = document.getElementById('stat-docs-count');
+        const vCount = document.getElementById('stat-voice-count');
+        const rCount = document.getElementById('stat-reminders-count');
+        
+        if (mCount) mCount.innerText = totalMemories;
+        if (dCount) dCount.innerText = totalDocs;
+        if (vCount) vCount.innerText = totalVoice;
+        if (rCount) rCount.innerText = totalReminders;
+        
+        populateOrbitNodes();
+    }
+    window.updateCosmicDashboard = updateCosmicDashboard;
+
+    function populateOrbitNodes() {
+        const container = document.getElementById('orbit-nodes-container');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const latestMemories = [...allMemories].slice(0, 5);
+        
+        const positions = [
+            { top: '15%', left: '20%', type: 'card', angle: -10 }, 
+            { top: '25%', left: '68%', type: 'card', angle: 12 },  
+            { top: '56%', left: '15%', type: 'card', angle: -8 }, 
+            { top: '65%', left: '65%', type: 'card', angle: 6 },  
+            { top: '34%', left: '42%', type: 'bubble' }            
+        ];
+        
+        latestMemories.forEach((m, idx) => {
+            if (idx >= positions.length) return;
+            const pos = positions[idx];
+            const timeText = m.timestamp ? m.timestamp : 'Just now';
+            
+            let title = m.category || 'Note';
+            let desc = m.content;
+            let iconHtml = '<i class="fa-solid fa-note-sticky"></i>';
+            
+            if (m.content.includes('[Document Attachment]')) {
+                title = 'Document';
+                iconHtml = '<i class="fa-solid fa-file-pdf" style="color: #ff7875;"></i>';
+                const filenameMatch = m.content.match(/filename:\s*([^|]+)/);
+                desc = filenameMatch ? filenameMatch[1].trim() : 'Document file';
+            } else if (m.category === 'task_reminder' || m.category === 'reminder') {
+                title = 'Reminder';
+                iconHtml = '<i class="fa-solid fa-bell" style="color: #ffb86c;"></i>';
+            } else if (m.category === 'idea') {
+                title = 'Idea';
+                iconHtml = '<i class="fa-solid fa-lightbulb" style="color: #ffd900;"></i>';
+            } else if (m.category === 'business_order') {
+                title = 'Order';
+                iconHtml = '<i class="fa-solid fa-cart-shopping" style="color: #34d399;"></i>';
+            } else if (m.category === 'voice' || m.category === 'audio') {
+                title = 'Voice note';
+                iconHtml = '<i class="fa-solid fa-microphone-lines" style="color: #60a5fa;"></i>';
+            }
+            
+            if (desc.length > 40) {
+                desc = desc.substring(0, 38) + '...';
+            }
+            
+            const formattedTitle = title.charAt(0).toUpperCase() + title.slice(1).replace('_', ' ');
+            
+            let nodeHtml = '';
+            if (pos.type === 'card') {
+                let audioWaveHtml = '';
+                if (m.category === 'voice' || m.content.toLowerCase().includes('voice')) {
+                    audioWaveHtml = `
+                        <div style="display: flex; gap: 2px; align-items: center; margin-top: 0.5rem; height: 12px;">
+                            <span style="display:inline-block; width: 2px; height: 6px; background: var(--accent-peach); border-radius:1px; animation: floatCard 0.8s ease infinite alternate;"></span>
+                            <span style="display:inline-block; width: 2px; height: 10px; background: var(--accent-peach); border-radius:1px; animation: floatCard 0.5s ease infinite alternate-reverse;"></span>
+                            <span style="display:inline-block; width: 2px; height: 4px; background: var(--accent-peach); border-radius:1px; animation: floatCard 0.7s ease infinite alternate;"></span>
+                            <span style="display:inline-block; width: 2px; height: 8px; background: var(--accent-peach); border-radius:1px; animation: floatCard 0.6s ease infinite alternate-reverse;"></span>
+                        </div>
+                    `;
+                }
+                
+                nodeHtml = `
+                    <div class="orbit-node-card" style="top: ${pos.top}; left: ${pos.left}; transform: rotate(${pos.angle}deg); cursor: pointer;" onclick="openEditModal('${m.id}')">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; font-weight: 700; color: #ffffff;">
+                           ${iconHtml}
+                           <span>${formattedTitle}</span>
+                        </div>
+                        <div style="color: var(--text-secondary); font-size: 0.72rem; line-height: 1.35;">${desc}</div>
+                        <div style="color: var(--text-muted); font-size: 0.65rem; margin-top: 0.35rem;">${timeText}</div>
+                        ${audioWaveHtml}
+                    </div>
+                `;
+            } else {
+                nodeHtml = `
+                    <div class="orbit-node-bubble" style="top: ${pos.top}; left: ${pos.left}; cursor: pointer;" onclick="openEditModal('${m.id}')">
+                        ${iconHtml}
+                        <span>${formattedTitle}</span>
+                    </div>
+                `;
+            }
+            
+            container.insertAdjacentHTML('beforeend', nodeHtml);
+        });
+    }
+
+    function handleCosmicCapture() {
+        const inputEl = document.getElementById('cosmic-capture-input');
+        if (!inputEl) return;
+        const text = inputEl.value.trim();
+        if (!text) return;
+        
+        inputEl.value = '';
+        
+        // Ensure composer mode is 'save'
+        const saveTabBtn = document.getElementById('composer-mode-save');
+        if (saveTabBtn) {
+            saveTabBtn.click();
+        } else {
+            currentComposerMode = 'save';
+            if (window.updateComposerUI) window.updateComposerUI();
+        }
+        
+        if (chatInput) {
+            chatInput.value = text;
+            handleSendMessage();
+        }
+    }
+
+    // Capture bar listeners
+    const cosmicCaptureInput = document.getElementById('cosmic-capture-input');
+    if (cosmicCaptureInput) {
+        cosmicCaptureInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleCosmicCapture();
+            }
+        });
+    }
+
+    const cosmicCaptureSubmit = document.getElementById('cosmic-capture-submit');
+    if (cosmicCaptureSubmit) {
+        cosmicCaptureSubmit.addEventListener('click', () => {
+            handleCosmicCapture();
+        });
+    }
+
+    const cosmicCaptureAdd = document.getElementById('cosmic-capture-add');
+    if (cosmicCaptureAdd) {
+        cosmicCaptureAdd.addEventListener('click', () => {
+            switchView('chat');
+            if (composerPlusBtn) {
+                setTimeout(() => {
+                    composerPlusBtn.click();
+                }, 150);
+            }
+        });
+    }
+
+    const cosmicCaptureVoice = document.getElementById('cosmic-capture-voice');
+    if (cosmicCaptureVoice) {
+        cosmicCaptureVoice.addEventListener('click', () => {
+            switchView('chat');
+            if (composerVoiceBtn) {
+                setTimeout(() => {
+                    composerVoiceBtn.click();
+                }, 150);
+            }
+        });
+    }
+
+    const centralOrb = document.getElementById('cosmic-central-orb');
+    if (centralOrb) {
+        centralOrb.addEventListener('click', () => {
+            centralOrb.style.transform = 'scale(0.92)';
+            setTimeout(() => {
+                centralOrb.style.transform = 'scale(1)';
+                updateCosmicDashboard();
+                showCustomAlert("Dashboard Refreshed", "Your latest memories orbit is synchronized successfully!");
+            }, 150);
+        });
     }
 
 
@@ -1685,6 +1889,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await renderMemories();
             checkDueReminders();
             loadVaultInsights();
+            updateCosmicDashboard();
         } catch (error) {
             console.error('Error loading memories:', error);
             memoriesContainer.innerHTML = `
@@ -3880,6 +4085,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderHeaderUserSection();
             loadMemories();
             updateStorageUsage();
+            switchView('home');
             handleSharedText();
         }
     }
