@@ -16,11 +16,9 @@ const MOCK_SCREENSHOTS = {
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- Navigation Elements ---
-    const navHomeBtn = document.getElementById('nav-home-btn');
     const navChatBtn = document.getElementById('nav-chat-btn');
     const navVaultBtn = document.getElementById('nav-vault-btn');
     const navFoldersBtn = document.getElementById('nav-folders-btn');
-    const viewHome = document.getElementById('view-home');
     const viewChat = document.getElementById('view-chat');
     const viewVault = document.getElementById('view-vault');
     const viewFolders = document.getElementById('view-folders');
@@ -351,12 +349,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.showCustomAlert = showCustomAlert;
 
     // --- Navigation Listeners ---
-    if (navHomeBtn) {
-        navHomeBtn.addEventListener('click', () => {
-            switchView('home');
-        });
-    }
-
     navChatBtn.addEventListener('click', () => {
         switchView('chat');
     });
@@ -371,244 +363,48 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Logo click redirects to Home Dashboard (Home Page)
+    // Logo click redirects to Chat view (Home Page)
     const topbarLogo = document.querySelector('.topbar-left');
     const sidebarLogo = document.querySelector('.sidebar-logo');
     if (topbarLogo) {
         topbarLogo.style.cursor = 'pointer';
         topbarLogo.addEventListener('click', () => {
-            switchView('home');
+            switchView('chat');
         });
     }
     if (sidebarLogo) {
         sidebarLogo.style.cursor = 'pointer';
         sidebarLogo.addEventListener('click', () => {
-            switchView('home');
+            switchView('chat');
         });
     }
 
     function switchView(viewName) {
-        // Reset all navigation active states
-        if (navHomeBtn) navHomeBtn.classList.remove('active');
-        navChatBtn.classList.remove('active');
-        navVaultBtn.classList.remove('active');
-        if (navFoldersBtn) navFoldersBtn.classList.remove('active');
-        
-        // Reset all view active classes
-        if (viewHome) viewHome.classList.remove('active');
-        viewChat.classList.remove('active');
-        viewVault.classList.remove('active');
-        if (viewFolders) viewFolders.classList.remove('active');
-        
-        if (viewName === 'home') {
-            if (navHomeBtn) navHomeBtn.classList.add('active');
-            if (viewHome) viewHome.classList.add('active');
-            updateCosmicDashboard();
-        } else if (viewName === 'chat') {
+        if (viewName === 'chat') {
             navChatBtn.classList.add('active');
+            navVaultBtn.classList.remove('active');
+            if (navFoldersBtn) navFoldersBtn.classList.remove('active');
             viewChat.classList.add('active');
-            renderChat();
+            viewVault.classList.remove('active');
+            if (viewFolders) viewFolders.classList.remove('active');
+            renderChat(); // Re-render chat layout on load
         } else if (viewName === 'vault') {
             navVaultBtn.classList.add('active');
+            navChatBtn.classList.remove('active');
+            if (navFoldersBtn) navFoldersBtn.classList.remove('active');
             viewVault.classList.add('active');
-            loadMemories();
+            viewChat.classList.remove('active');
+            if (viewFolders) viewFolders.classList.remove('active');
+            loadMemories(); // Refresh when opening vault
         } else if (viewName === 'folders') {
             if (navFoldersBtn) navFoldersBtn.classList.add('active');
+            navChatBtn.classList.remove('active');
+            navVaultBtn.classList.remove('active');
             if (viewFolders) viewFolders.classList.add('active');
-            loadFoldersView();
+            viewChat.classList.remove('active');
+            viewVault.classList.remove('active');
+            loadFoldersView(); // Refresh and load folders view contents
         }
-    }
-
-    // --- Cosmic Dashboard Core Logic ---
-    function updateCosmicDashboard() {
-        const totalMemories = allMemories.length;
-        const totalDocs = allMemories.filter(m => {
-            const content = m.content.toLowerCase();
-            return m.category === 'document' || content.includes('[document attachment]') || content.includes('aadhar.pdf');
-        }).length;
-        const totalVoice = allMemories.filter(m => {
-            const content = m.content.toLowerCase();
-            return m.category === 'voice' || m.category === 'audio' || content.includes('[audio attachment]') || content.includes('[voice attachment]');
-        }).length;
-        const totalReminders = allMemories.filter(m => {
-            return m.category === 'reminder' || m.category === 'task_reminder' || m.reminder_time;
-        }).length;
-        
-        const mCount = document.getElementById('stat-memories-count');
-        const dCount = document.getElementById('stat-docs-count');
-        const vCount = document.getElementById('stat-voice-count');
-        const rCount = document.getElementById('stat-reminders-count');
-        
-        if (mCount) mCount.innerText = totalMemories;
-        if (dCount) dCount.innerText = totalDocs;
-        if (vCount) vCount.innerText = totalVoice;
-        if (rCount) rCount.innerText = totalReminders;
-        
-        populateOrbitNodes();
-    }
-    window.updateCosmicDashboard = updateCosmicDashboard;
-
-    function populateOrbitNodes() {
-        const container = document.getElementById('orbit-nodes-container');
-        if (!container) return;
-        container.innerHTML = '';
-        
-        const latestMemories = [...allMemories].slice(0, 5);
-        
-        const positions = [
-            { top: '15%', left: '20%', type: 'card', angle: -10 }, 
-            { top: '25%', left: '68%', type: 'card', angle: 12 },  
-            { top: '56%', left: '15%', type: 'card', angle: -8 }, 
-            { top: '65%', left: '65%', type: 'card', angle: 6 },  
-            { top: '34%', left: '42%', type: 'bubble' }            
-        ];
-        
-        latestMemories.forEach((m, idx) => {
-            if (idx >= positions.length) return;
-            const pos = positions[idx];
-            const timeText = m.timestamp ? m.timestamp : 'Just now';
-            
-            let title = m.category || 'Note';
-            let desc = m.content;
-            let iconHtml = '<i class="fa-solid fa-note-sticky"></i>';
-            
-            if (m.content.includes('[Document Attachment]')) {
-                title = 'Document';
-                iconHtml = '<i class="fa-solid fa-file-pdf" style="color: #ff7875;"></i>';
-                const filenameMatch = m.content.match(/filename:\s*([^|]+)/);
-                desc = filenameMatch ? filenameMatch[1].trim() : 'Document file';
-            } else if (m.category === 'task_reminder' || m.category === 'reminder') {
-                title = 'Reminder';
-                iconHtml = '<i class="fa-solid fa-bell" style="color: #ffb86c;"></i>';
-            } else if (m.category === 'idea') {
-                title = 'Idea';
-                iconHtml = '<i class="fa-solid fa-lightbulb" style="color: #ffd900;"></i>';
-            } else if (m.category === 'business_order') {
-                title = 'Order';
-                iconHtml = '<i class="fa-solid fa-cart-shopping" style="color: #34d399;"></i>';
-            } else if (m.category === 'voice' || m.category === 'audio') {
-                title = 'Voice note';
-                iconHtml = '<i class="fa-solid fa-microphone-lines" style="color: #60a5fa;"></i>';
-            }
-            
-            if (desc.length > 40) {
-                desc = desc.substring(0, 38) + '...';
-            }
-            
-            const formattedTitle = title.charAt(0).toUpperCase() + title.slice(1).replace('_', ' ');
-            
-            let nodeHtml = '';
-            if (pos.type === 'card') {
-                let audioWaveHtml = '';
-                if (m.category === 'voice' || m.content.toLowerCase().includes('voice')) {
-                    audioWaveHtml = `
-                        <div style="display: flex; gap: 2px; align-items: center; margin-top: 0.5rem; height: 12px;">
-                            <span style="display:inline-block; width: 2px; height: 6px; background: var(--accent-peach); border-radius:1px; animation: floatCard 0.8s ease infinite alternate;"></span>
-                            <span style="display:inline-block; width: 2px; height: 10px; background: var(--accent-peach); border-radius:1px; animation: floatCard 0.5s ease infinite alternate-reverse;"></span>
-                            <span style="display:inline-block; width: 2px; height: 4px; background: var(--accent-peach); border-radius:1px; animation: floatCard 0.7s ease infinite alternate;"></span>
-                            <span style="display:inline-block; width: 2px; height: 8px; background: var(--accent-peach); border-radius:1px; animation: floatCard 0.6s ease infinite alternate-reverse;"></span>
-                        </div>
-                    `;
-                }
-                
-                nodeHtml = `
-                    <div class="orbit-node-card" style="top: ${pos.top}; left: ${pos.left}; transform: rotate(${pos.angle}deg); cursor: pointer;" onclick="openEditModal('${m.id}')">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; font-weight: 700; color: #ffffff;">
-                           ${iconHtml}
-                           <span>${formattedTitle}</span>
-                        </div>
-                        <div style="color: var(--text-secondary); font-size: 0.72rem; line-height: 1.35;">${desc}</div>
-                        <div style="color: var(--text-muted); font-size: 0.65rem; margin-top: 0.35rem;">${timeText}</div>
-                        ${audioWaveHtml}
-                    </div>
-                `;
-            } else {
-                nodeHtml = `
-                    <div class="orbit-node-bubble" style="top: ${pos.top}; left: ${pos.left}; cursor: pointer;" onclick="openEditModal('${m.id}')">
-                        ${iconHtml}
-                        <span>${formattedTitle}</span>
-                    </div>
-                `;
-            }
-            
-            container.insertAdjacentHTML('beforeend', nodeHtml);
-        });
-    }
-
-    function handleCosmicCapture() {
-        const inputEl = document.getElementById('cosmic-capture-input');
-        if (!inputEl) return;
-        const text = inputEl.value.trim();
-        if (!text) return;
-        
-        inputEl.value = '';
-        
-        // Ensure composer mode is 'save'
-        const saveTabBtn = document.getElementById('composer-mode-save');
-        if (saveTabBtn) {
-            saveTabBtn.click();
-        } else {
-            currentComposerMode = 'save';
-            if (window.updateComposerUI) window.updateComposerUI();
-        }
-        
-        if (chatInput) {
-            chatInput.value = text;
-            handleSendMessage();
-        }
-    }
-
-    // Capture bar listeners
-    const cosmicCaptureInput = document.getElementById('cosmic-capture-input');
-    if (cosmicCaptureInput) {
-        cosmicCaptureInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handleCosmicCapture();
-            }
-        });
-    }
-
-    const cosmicCaptureSubmit = document.getElementById('cosmic-capture-submit');
-    if (cosmicCaptureSubmit) {
-        cosmicCaptureSubmit.addEventListener('click', () => {
-            handleCosmicCapture();
-        });
-    }
-
-    const cosmicCaptureAdd = document.getElementById('cosmic-capture-add');
-    if (cosmicCaptureAdd) {
-        cosmicCaptureAdd.addEventListener('click', () => {
-            switchView('chat');
-            if (composerPlusBtn) {
-                setTimeout(() => {
-                    composerPlusBtn.click();
-                }, 150);
-            }
-        });
-    }
-
-    const cosmicCaptureVoice = document.getElementById('cosmic-capture-voice');
-    if (cosmicCaptureVoice) {
-        cosmicCaptureVoice.addEventListener('click', () => {
-            switchView('chat');
-            if (composerVoiceBtn) {
-                setTimeout(() => {
-                    composerVoiceBtn.click();
-                }, 150);
-            }
-        });
-    }
-
-    const centralOrb = document.getElementById('cosmic-central-orb');
-    if (centralOrb) {
-        centralOrb.addEventListener('click', () => {
-            centralOrb.style.transform = 'scale(0.92)';
-            setTimeout(() => {
-                centralOrb.style.transform = 'scale(1)';
-                updateCosmicDashboard();
-                showCustomAlert("Dashboard Refreshed", "Your latest memories orbit is synchronized successfully!");
-            }, 150);
-        });
     }
 
 
@@ -1889,7 +1685,6 @@ document.addEventListener('DOMContentLoaded', () => {
             await renderMemories();
             checkDueReminders();
             loadVaultInsights();
-            updateCosmicDashboard();
         } catch (error) {
             console.error('Error loading memories:', error);
             memoriesContainer.innerHTML = `
@@ -2768,48 +2563,194 @@ document.addEventListener('DOMContentLoaded', () => {
      * Centralized Chat Renderer
      * Renders chat bubbles from the `chatMessages` array.
      */
+    function updateBrainStats() {
+        const memoriesCount = allMemories.length;
+        
+        // Count documents
+        const docsCount = allMemories.filter(m => m.category === 'document' || m.content.includes('[Document Attachment]')).length;
+        
+        // Count voice notes
+        const voiceCount = allMemories.filter(m => m.category === 'voice_note' || m.content.toLowerCase().includes('voice note') || m.content.includes('[Voice Attachment]')).length;
+        
+        // Count reminders
+        const remindersCount = allMemories.filter(m => m.category === 'task_reminder' || m.content.toLowerCase().includes('reminder') || m.reminder_time).length;
+        
+        // Update DOM elements
+        const memEl = document.getElementById('stats-count-memories');
+        const docEl = document.getElementById('stats-count-documents');
+        const voiceEl = document.getElementById('stats-count-voice');
+        const remEl = document.getElementById('stats-count-reminders');
+        
+        if (memEl) memEl.innerText = memoriesCount;
+        if (docEl) docEl.innerText = docsCount;
+        if (voiceEl) voiceEl.innerText = voiceCount;
+        if (remEl) remEl.innerText = remindersCount;
+    }
+
+    function renderOrbitalDashboard(container) {
+        const cardsContainer = container.querySelector('#orbital-floating-cards');
+        if (!cardsContainer) return;
+        cardsContainer.innerHTML = '';
+        
+        const recentMemories = allMemories.slice(0, 3);
+        const positions = [
+            { x: -130, y: -90, delay: '0s', angle: -6 },
+            { x: 140, y: -50, delay: '1.5s', angle: 8 },
+            { x: 10, y: 110, delay: '3s', angle: -2 }
+        ];
+        
+        recentMemories.forEach((m, idx) => {
+            const pos = positions[idx] || { x: 0, y: 0, delay: '0s', angle: 0 };
+            let snippet = m.content;
+            
+            if (m.content.startsWith('[Document Attachment]') || m.content.startsWith('[Image Attachment]')) {
+                const filenameMatch = m.content.match(/filename:\s*([^|]+)/);
+                snippet = filenameMatch ? `Attachment: ${filenameMatch[1].trim()}` : 'Uploaded document';
+            } else if (snippet.length > 55) {
+                snippet = snippet.substring(0, 52) + '...';
+            }
+            
+            const card = document.createElement('div');
+            card.style = `
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px)) rotate(${pos.angle}deg);
+                width: 140px;
+                background: rgba(24, 15, 34, 0.65);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                border: 1px solid rgba(226, 131, 167, 0.15);
+                padding: 0.75rem;
+                border-radius: 12px;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+                pointer-events: auto;
+                cursor: pointer;
+                transition: all 0.25s ease;
+                z-index: 15;
+                animation: floatGently 5s infinite alternate ease-in-out;
+                animation-delay: ${pos.delay};
+            `;
+            
+            card.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 0.35rem; pointer-events: none;">
+                    <span style="font-size: 0.62rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">${formatCategoryName(m.category)}</span>
+                    <p style="font-size: 0.74rem; color: var(--text-primary); line-height: 1.35; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-weight: 500;">${snippet}</p>
+                </div>
+            `;
+            
+            // Hover styles
+            card.onmouseover = () => {
+                card.style.transform = `translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px)) rotate(${pos.angle}deg) scale(1.05)`;
+                card.style.boxShadow = `0 12px 30px rgba(226, 131, 167, 0.25), 0 0 15px rgba(226, 131, 167, 0.15)`;
+                card.style.borderColor = 'rgba(226, 131, 167, 0.35)';
+                card.style.background = 'rgba(24, 15, 34, 0.85)';
+            };
+            card.onmouseout = () => {
+                card.style.transform = `translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px)) rotate(${pos.angle}deg) scale(1)`;
+                card.style.boxShadow = '0 8px 24px rgba(0,0,0,0.35)';
+                card.style.borderColor = 'rgba(226, 131, 167, 0.15)';
+                card.style.background = 'rgba(24, 15, 34, 0.65)';
+            };
+            
+            card.onclick = (e) => {
+                e.stopPropagation();
+                if (window.openEditModal) window.openEditModal(m.id);
+            };
+            
+            cardsContainer.appendChild(card);
+        });
+    }
+
     function renderChat() {
         chatMessagesThread.innerHTML = '';
+        
+        // Refresh brain statistics panel
+        updateBrainStats();
         
         if (chatMessages.length === 0) {
             const welcome = document.createElement('div');
             welcome.className = 'welcome-container';
-            welcome.style = "display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin: auto; max-width: 480px; padding: 1.5rem 1rem; gap: 1rem; overflow: visible;";
+            welcome.style = "display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; position: relative; overflow: visible; padding: 2rem 0; flex: 1;";
             welcome.innerHTML = `
-                <div class="welcome-logo" style="width: 56px; height: 56px; background-color: #ffffff; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #111318; box-shadow: 0 8px 24px rgba(0,0,0,0.15); flex-shrink: 0;">
-                    <i class="fa-solid fa-brain"></i>
+                <!-- Hero Headline -->
+                <div class="hero-headline-container" style="text-align: center; margin-bottom: 2rem; z-index: 10; animation: fadeIn 0.8s ease-out;">
+                    <h1 style="font-family: var(--font-serif); font-size: 2.8rem; font-weight: 400; color: var(--text-primary); line-height: 1.25; margin: 0;">
+                        Drop today, <em style="font-style: italic; font-weight: 400; font-family: var(--font-serif); color: var(--accent-glow);">forever.</em>
+                    </h1>
+                    <p style="font-size: 0.82rem; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.5rem; font-family: var(--font-sans);">Your Second Brain</p>
                 </div>
-                <div class="welcome-greeting" style="font-size: 0.88rem; font-weight: 600; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.5rem;">Hi, Leharin</div>
-                <h1 class="welcome-headline" style="font-family: 'League Spartan', sans-serif; font-size: 2.2rem; font-weight: 800; color: #ffffff; line-height: 1.1; margin: 0;">What are you dropping in today?</h1>
-                <p class="welcome-subtext" style="font-size: 0.88rem; color: #8B8F9C; line-height: 1.5; margin: 0;">MemoDrop auto-categorizes your unorganized text, links, and documents instantly.</p>
-                
-                <!-- Quick Demo Scenario Pills -->
-                <div class="welcome-scenarios" style="display: flex; flex-direction: column; gap: 0.6rem; width: 100%; margin-top: 1.25rem; align-items: center;">
-                    <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Try these examples:</span>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 440px;">
-                        <button type="button" class="pill-btn" data-text="Fabric Supplier offered cotton roll at Rs 120 per meter. Contact: 9876543210." style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 0.45rem 0.85rem; font-size: 0.75rem; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: inherit; font-weight: 500;">
-                            <i class="fa-solid fa-cloud-arrow-up" style="color: #6ee7b7; margin-right: 0.35rem;"></i> Save cotton roll quote
-                        </button>
-                        <button type="button" class="pill-btn" data-text="Verify Ramesh Fabrics quote" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 0.45rem 0.85rem; font-size: 0.75rem; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: inherit; font-weight: 500;">
-                            <i class="fa-solid fa-magnifying-glass" style="color: #60a5fa; margin-right: 0.35rem;"></i> Verify Ramesh Fabrics quote
-                        </button>
-                        <button type="button" class="pill-btn" data-text="what was the cotton roll quote?" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 0.45rem 0.85rem; font-size: 0.75rem; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: inherit; font-weight: 500;">
-                            <i class="fa-solid fa-magnifying-glass" style="color: #fde047; margin-right: 0.35rem;"></i> Find cotton roll quote
-                        </button>
+
+                <!-- Interactive Solar System Viewport -->
+                <div id="mind-map-viewport" style="position: relative; width: 100%; max-width: 600px; height: 350px; display: flex; align-items: center; justify-content: center; margin: 0 auto; overflow: visible; z-index: 5;">
+                    
+                    <!-- Center Node (Planet) -->
+                    <div class="center-brain-node" style="position: absolute; width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #FF9EB5 0%, #E283A7 50%, #803D58 100%); box-shadow: 0 0 40px rgba(255, 158, 181, 0.4), inset -10px -10px 20px rgba(0,0,0,0.5); z-index: 10; display: flex; align-items: center; justify-content: center; cursor: pointer; animation: pulseGlow 4s infinite alternate ease-in-out;">
+                        <i class="fa-solid fa-brain" style="font-size: 2.2rem; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.3);"></i>
                     </div>
+
+                    <!-- Orbit Ring 1 (Inner) -->
+                    <div class="orbit-ring" style="position: absolute; width: 220px; height: 120px; border: 1px solid rgba(226, 131, 167, 0.15); border-radius: 50%; z-index: 3; pointer-events: none; transform: rotate(-8deg); animation: rotateOrbit 30s infinite linear;"></div>
+
+                    <!-- Orbit Ring 2 (Middle) -->
+                    <div class="orbit-ring" style="position: absolute; width: 380px; height: 200px; border: 1px solid rgba(226, 131, 167, 0.12); border-radius: 50%; z-index: 2; pointer-events: none; transform: rotate(-8deg); animation: rotateOrbitCounter 45s infinite linear;"></div>
+
+                    <!-- Orbit Ring 3 (Outer) -->
+                    <div class="orbit-ring" style="position: absolute; width: 520px; height: 280px; border: 1px solid rgba(226, 131, 167, 0.08); border-radius: 50%; z-index: 1; pointer-events: none; transform: rotate(-8deg); animation: rotateOrbit 60s infinite linear;"></div>
+
+                    <!-- Category Badges -->
+                    <div class="orbital-node ideas" data-category="idea" style="position: absolute; z-index: 12; transform: translate(-100px, -45px);">
+                        <div class="orbit-pill" style="display: flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.95rem; border-radius: 20px; background: rgba(24, 15, 34, 0.75); border: 1px solid rgba(251,191,36,0.3); box-shadow: 0 0 15px rgba(251,191,36,0.15); cursor: pointer; transition: all 0.2s;">
+                            <span style="width: 6px; height: 6px; border-radius: 50%; background: #fbbf24;"></span>
+                            <span style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-primary);">Ideas</span>
+                        </div>
+                    </div>
+
+                    <div class="orbital-node personal" data-category="personal" style="position: absolute; z-index: 12; transform: translate(120px, 30px);">
+                        <div class="orbit-pill" style="display: flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.95rem; border-radius: 20px; background: rgba(24, 15, 34, 0.75); border: 1px solid rgba(192,132,252,0.3); box-shadow: 0 0 15px rgba(192,132,252,0.15); cursor: pointer; transition: all 0.2s;">
+                            <span style="width: 6px; height: 6px; border-radius: 50%; background: #c084fc;"></span>
+                            <span style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-primary);">Personal</span>
+                        </div>
+                    </div>
+
+                    <div class="orbital-node work" data-category="work" style="position: absolute; z-index: 12; transform: translate(-170px, 80px);">
+                        <div class="orbit-pill" style="display: flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.95rem; border-radius: 20px; background: rgba(24, 15, 34, 0.75); border: 1px solid rgba(52,211,153,0.3); box-shadow: 0 0 15px rgba(52,211,153,0.15); cursor: pointer; transition: all 0.2s;">
+                            <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399;"></span>
+                            <span style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-primary);">Work</span>
+                        </div>
+                    </div>
+
+                    <!-- Floating Cards Container -->
+                    <div id="orbital-floating-cards" style="position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 6;"></div>
                 </div>
             `;
             chatMessagesThread.appendChild(welcome);
 
-            // Bind click events to dynamically generated scenario buttons
-            welcome.querySelectorAll('.pill-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const text = btn.getAttribute('data-text');
-                    chatInput.value = text;
-                    chatInput.dispatchEvent(new Event('input'));
-                    handleSendMessage();
+            // Bind click events to category badges in orbital map
+            welcome.querySelectorAll('.orbital-node').forEach(node => {
+                node.style.cursor = 'pointer';
+                node.addEventListener('click', () => {
+                    const cat = node.getAttribute('data-category');
+                    if (cat === 'idea') {
+                        switchView('vault');
+                        const ideaTab = document.querySelector(`.tab-btn[data-category="idea"]`);
+                        if (ideaTab) ideaTab.click();
+                    } else if (cat === 'work') {
+                        // Switch to business mode
+                        const bizBtn = document.getElementById('vault-segment-btn-business');
+                        if (bizBtn) bizBtn.click();
+                        switchView('vault');
+                    } else if (cat === 'personal') {
+                        // Switch to personal mode
+                        const persBtn = document.getElementById('vault-segment-btn-personal');
+                        if (persBtn) persBtn.click();
+                        switchView('vault');
+                    }
                 });
             });
+
+            // Dynamically populate floating cards
+            renderOrbitalDashboard(welcome);
             return;
         }
         
@@ -4085,7 +4026,6 @@ document.addEventListener('DOMContentLoaded', () => {
             renderHeaderUserSection();
             loadMemories();
             updateStorageUsage();
-            switchView('home');
             handleSharedText();
         }
     }

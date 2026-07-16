@@ -3,38 +3,38 @@
    ========================================================================== */
 
 :root {
-    /* Color Palette - Updated to Cosmic Space Theme */
-    --bg-main: #09070f;
-    --bg-sidebar: #05040a;
-    --bg-card: rgba(25, 18, 38, 0.45);
-    --border-light: rgba(255, 255, 255, 0.06);
-    --border-dark: rgba(255, 255, 255, 0.12);
+    /* Color Palette - Cosmic Cyber-Minimalism */
+    --bg-main: #130C19;       /* Deep space base */
+    --bg-sidebar: #0f0814;    /* Ultra-dark spine base */
+    --bg-card: rgba(24, 15, 34, 0.45); /* Glassmorphic deep purple */
+    --border-light: rgba(226, 131, 167, 0.08); /* Low-opacity magenta/coral border */
+    --border-dark: rgba(226, 131, 167, 0.18); /* Active elements border */
     
     /* Text Colors */
-    --text-primary: #F3F1F5;   
-    --text-secondary: #a39eb2; 
-    --text-muted: #5f5a70;     
+    --text-primary: #EAE5ED;   /* Soft off-white */
+    --text-secondary: #9F8FA6; /* Muted lavender-gray */
+    --text-muted: #6C5B73;     /* Muted dark violet */
     
-    /* Accents */
-    --accent-color: #8b5cf6;   
-    --accent-peach: #ff6b4a;   
-    --accent-pink: #d946ef;    
+    /* Accents & Glows */
+    --accent-color: #E283A7;   /* Radiant pink */
+    --accent-glow: #FF9EB5;    /* Soft neon coral glow */
     --accent-yellow: #fbbf24;
     --accent-mint: #34d399;
-    --accent-lavender: #a78bfa;
+    --accent-lavender: #c084fc;
     
     /* Bubbles */
-    --bubble-user: #8b5cf6;
-    --bubble-bot: rgba(25, 18, 38, 0.45);
+    --bubble-user: #E283A7;    /* Magenta/pink user bubble */
+    --bubble-bot: rgba(24, 15, 34, 0.55);
     
     /* UI Config */
-    --radius-sm: 8px;
-    --radius-md: 16px;
-    --radius-lg: 24px;
-    --shadow-flat: 0 8px 32px rgba(0, 0, 0, 0.35);
-    --glass-bg: rgba(25, 18, 38, 0.45);
-    --glass-border: rgba(255, 255, 255, 0.06);
-    --glass-glow: 0 8px 32px rgba(0, 0, 0, 0.35);
+    --radius-sm: 10px;
+    --radius-md: 20px;
+    --radius-lg: 30px;
+    --shadow-flat: 0 4px 24px rgba(0, 0, 0, 0.3);
+    
+    /* Font Configurations */
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-sans: 'Inter', sans-serif;
 }
 
 /* Global Reset */
@@ -45,9 +45,9 @@
 }
 
 body {
-    background: radial-gradient(circle at 50% 50%, #150f28 0%, #06050b 100%);
+    background: linear-gradient(135deg, #130C19 0%, #1A0E27 50%, #100818 100%);
     color: var(--text-primary);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans);
     overflow: hidden;
     height: 100vh;
 }
@@ -2068,344 +2068,103 @@ body {
 }
 
 /* ==========================================================================
-   COSMIC DESIGN & ORBIT SYSTEM
+   Cosmic Cyber-Minimalism Animations & Overrides
    ========================================================================== */
 
-/* Curved Sidebar layout */
-.curved-sidebar-container {
-    position: relative;
-    width: 90px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: transparent;
-    z-index: 100;
+/* Active Sidebar Navigation Item: Encased in a soft, glowing magenta orb */
+.nav-item.active {
+    color: #ffffff !important;
+    background-color: var(--accent-color) !important;
+    border: none;
+    box-shadow: 0 0 16px var(--accent-color), 0 0 4px var(--accent-glow) !important;
 }
 
-.sidebar-curve-svg {
+/* Slim Curved Orbit Spine connector line passing through nav items */
+.app-sidebar::before {
+    content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
+    top: 10%;
+    bottom: 10%;
+    left: 50%;
+    width: 1px;
+    background: linear-gradient(180deg, rgba(226, 131, 167, 0) 0%, rgba(226, 131, 167, 0.2) 20%, rgba(226, 131, 167, 0.2) 80%, rgba(226, 131, 167, 0) 100%);
     z-index: 1;
+    pointer-events: none;
 }
 
-.sidebar-nav-items {
+/* Ensure sidebar items sit above the Spine line */
+.sidebar-logo, .sidebar-nav, .sidebar-footer {
     position: relative;
-    width: 100%;
-    height: 100%;
     z-index: 2;
 }
 
-/* Home view layout */
-.cosmic-home-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 2rem;
-    height: 100%;
-    padding: 1.5rem 2rem;
-    overflow: hidden;
-    position: relative;
+/* Solar System Animations */
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 25px rgba(255, 158, 181, 0.4), inset -5px -5px 15px rgba(0,0,0,0.4);
+    }
+    100% {
+        box-shadow: 0 0 45px rgba(255, 158, 181, 0.75), inset -10px -10px 20px rgba(0,0,0,0.6);
+    }
 }
 
-/* Dashboard left column containing orbits and capture */
-.cosmic-dashboard-left {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-    padding-bottom: 0.5rem;
+@keyframes rotateOrbit {
+    from {
+        transform: rotate(-8deg) rotate(0deg);
+    }
+    to {
+        transform: rotate(-8deg) rotate(360deg);
+    }
 }
 
-.cosmic-title-section {
-    text-align: center;
-    margin-top: 1rem;
+@keyframes rotateOrbitCounter {
+    from {
+        transform: rotate(-8deg) rotate(360deg);
+    }
+    to {
+        transform: rotate(-8deg) rotate(0deg);
+    }
 }
 
-.cosmic-title-section h1 {
-    font-family: 'League Spartan', sans-serif;
-    font-weight: 800;
-    font-size: 2.75rem;
-    color: #ffffff;
-    line-height: 1.15;
-    margin-bottom: 0.5rem;
+/* Gentle floating animation for cards and orbital nodes */
+@keyframes floatGently {
+    0% {
+        margin-top: -6px;
+    }
+    100% {
+        margin-top: 6px;
+    }
 }
 
-.cosmic-title-section h1 span {
-    font-family: Georgia, serif;
-    font-style: italic;
-    font-weight: 400;
-    background: linear-gradient(135deg, #f472b6, #d946ef);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.orbital-node {
+    animation: floatGently 6s infinite alternate ease-in-out;
+}
+.orbital-node.ideas {
+    animation-delay: 0s;
+}
+.orbital-node.personal {
+    animation-delay: 1.5s;
+}
+.orbital-node.work {
+    animation-delay: 3s;
 }
 
-.cosmic-title-section p {
-    font-size: 0.95rem;
-    color: var(--text-secondary);
+@keyframes waveSlow {
+    0% {
+        transform: translateX(-5%);
+    }
+    100% {
+        transform: translateX(5%);
+    }
 }
 
-/* Orbit system layout */
-.orbit-system-container {
-    position: relative;
-    width: 100%;
-    height: 480px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    perspective: 1000px;
-    overflow: visible;
-}
-
-.central-orb-glow {
-    position: absolute;
-    width: 320px;
-    height: 320px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0) 70%);
-    pointer-events: none;
-    z-index: 1;
-}
-
-.central-orb {
-    position: relative;
-    width: 130px;
-    height: 130px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #ff6b4a 0%, #8b5cf6 50%, #d946ef 100%);
-    box-shadow: 0 0 60px rgba(139, 92, 246, 0.4), inset -12px -12px 30px rgba(0,0,0,0.6), inset 12px 12px 30px rgba(255,255,255,0.25);
-    z-index: 5;
-    animation: floatOrb 5s ease-in-out infinite;
-    cursor: pointer;
-}
-
-.orbit-ring {
-    position: absolute;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 50%;
-    transform: rotateX(75deg) rotateY(-10deg);
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.orbit-ring-1 { width: 340px; height: 340px; z-index: 2; }
-.orbit-ring-2 { width: 500px; height: 500px; z-index: 3; }
-.orbit-ring-3 { width: 660px; height: 660px; z-index: 4; }
-
-/* Orbit node placements and styling */
-.orbit-node-card {
-    position: absolute;
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px) saturate(120%);
-    -webkit-backdrop-filter: blur(16px) saturate(120%);
-    border: 1px solid var(--glass-border);
-    padding: 0.85rem 1.1rem;
-    border-radius: 16px;
-    color: var(--text-primary);
-    font-size: 0.8rem;
-    box-shadow: var(--glass-glow);
-    pointer-events: auto;
-    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-    animation: floatCard 4s ease-in-out infinite alternate;
-}
-
-.orbit-node-card:hover {
-    border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 12px 40px rgba(139, 92, 246, 0.25);
-    transform: translateY(-5px) scale(1.02) !important;
-}
-
-/* Floating labels */
-.orbit-node-bubble {
-    position: absolute;
-    background: rgba(25, 18, 38, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 0.35rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    box-shadow: var(--shadow-flat);
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    pointer-events: auto;
-    transition: transform 0.2s, color 0.2s;
-}
-
-.orbit-node-bubble:hover {
-    color: #ffffff;
-    transform: scale(1.05);
-}
-
-/* Right statistics dashboard panel */
-.cosmic-brain-panel {
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    box-shadow: var(--glass-glow);
-    align-self: center;
-    margin-top: 1rem;
-}
-
-.cosmic-brain-panel h3 {
-    font-family: 'League Spartan', sans-serif;
-    font-weight: 800;
-    text-transform: uppercase;
-    font-size: 1rem;
-    color: var(--text-secondary);
-    letter-spacing: 0.05em;
-    margin: 0;
-}
-
-.cosmic-stat-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.65rem 0.85rem;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    border-radius: 12px;
-}
-
-.cosmic-stat-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-}
-
-.cosmic-stat-icon.memories { background: rgba(139, 92, 246, 0.12); color: #a78bfa; }
-.cosmic-stat-icon.docs { background: rgba(96, 165, 250, 0.12); color: #60a5fa; }
-.cosmic-stat-icon.voice { background: rgba(52, 211, 153, 0.12); color: #34d399; }
-.cosmic-stat-icon.reminders { background: rgba(251, 146, 60, 0.12); color: #fb923c; }
-
-.cosmic-stat-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-}
-
-.cosmic-stat-value {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: #ffffff;
-    line-height: 1;
-}
-
-.cosmic-stat-label {
-    font-size: 0.68rem;
-    color: var(--text-secondary);
-}
-
-/* Bottom Capture Bar Pill */
-.cosmic-capture-section {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    position: relative;
-    padding: 0 1rem;
-}
-
-.cosmic-capture-bar {
-    background: rgba(25, 18, 38, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 30px;
-    padding: 0.4rem 0.6rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.02);
-}
-
-.cosmic-capture-input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #ffffff;
-    font-size: 0.9rem;
-    padding: 0.5rem 0.25rem;
-}
-
-.cosmic-capture-input::placeholder {
-    color: var(--text-secondary);
-}
-
-.cosmic-action-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.15s, opacity 0.15s;
-    outline: none;
-}
-
-.cosmic-action-btn:hover {
-    transform: scale(1.05);
-}
-
-.cosmic-action-btn.add {
-    background: linear-gradient(135deg, #ff6b4a, #d946ef);
-    color: #ffffff;
-    font-size: 1.15rem;
-}
-
-.cosmic-action-btn.mic {
-    background: transparent;
-    color: var(--text-secondary);
-    font-size: 1rem;
-}
-
-.cosmic-action-btn.mic:hover {
-    color: #ffffff;
-    background: rgba(255,255,255,0.05);
-}
-
-.cosmic-action-btn.send {
-    background: linear-gradient(135deg, #8b5cf6, #d946ef);
-    color: #ffffff;
-    font-size: 0.95rem;
-}
-
-.cosmic-footer-quote {
-    text-align: center;
-    font-family: Georgia, serif;
-    font-style: italic;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin-top: 0.5rem;
-    letter-spacing: 0.05em;
-}
-
-/* Animations */
-@keyframes floatOrb {
-    0% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-8px) rotate(5deg); }
-    100% { transform: translateY(0px) rotate(0deg); }
-}
-
-@keyframes floatCard {
-    from { transform: translateY(0); }
-    to { transform: translateY(-5px); }
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

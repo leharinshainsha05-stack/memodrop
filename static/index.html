@@ -7,10 +7,10 @@
     <!-- Google Fonts: League Spartan (Headlines) & Inter (Body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=League+Spartan:wght@700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=League+Spartan:wght@700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=2.2.0">
+    <link rel="stylesheet" href="style.css?v=2.1.3">
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -18,273 +18,241 @@
     <!-- Main App Layout Shell -->
     <div class="app-layout">
         
-        <!-- SIDEBAR: Curved Icon Navigation -->
-        <aside class="app-sidebar curved-sidebar-container">
-            <svg class="sidebar-curve-svg" viewBox="0 0 100 800" preserveAspectRatio="none">
-                <path d="M10,20 Q110,400 10,780" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.5" />
-            </svg>
-            <div class="sidebar-logo" style="margin-top: 1.5rem; margin-bottom: 2rem; position: relative; z-index: 10;">
-                <i class="fa-solid fa-droplet" style="color: var(--accent-peach);"></i>
+        <!-- SIDEBAR: Slim Icon Navigation -->
+        <aside class="app-sidebar">
+            <div class="sidebar-logo">
+                <i class="fa-solid fa-brain"></i>
             </div>
-            
-            <div class="sidebar-nav-items">
-                <!-- Home button (at the peak of the curve) -->
-                <button class="nav-item active" id="nav-home-btn" title="Dashboard Home" style="position: absolute; top: 12%; left: 32px;">
-                    <i class="fa-solid fa-house"></i>
-                    <span>Home</span>
-                </button>
-                
-                <!-- Chat/Brain button -->
-                <button class="nav-item" id="nav-chat-btn" title="Chat Interface" style="position: absolute; top: 27%; left: 45px;">
-                    <i class="fa-solid fa-comments"></i>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" id="nav-chat-btn" title="Chat Interface">
+                    <i class="fa-solid fa-message"></i>
                     <span>Chat</span>
                 </button>
-                
-                <!-- Folder button -->
-                <button class="nav-item" id="nav-folders-btn" title="Document Folders" style="position: absolute; top: 42%; left: 48px;">
-                    <i class="fa-solid fa-folder"></i>
-                    <span>Folders</span>
-                </button>
-                
-                <!-- Notifications/Alerts button -->
-                <button class="nav-item" id="nav-vault-btn" title="Memory Vault" style="position: absolute; top: 57%; left: 45px;">
+                <button class="nav-item" id="nav-vault-btn" title="Memory Vault">
                     <i class="fa-solid fa-vault"></i>
                     <span>Vault</span>
                 </button>
-                
-                <!-- Settings button -->
-                <button class="nav-item" id="sidebar-storage-btn" title="Storage & Settings" style="position: absolute; top: 72%; left: 32px;">
-                    <i class="fa-solid fa-sliders"></i>
-                    <div id="sidebar-storage-dot" style="position: absolute; top: 0; right: 0; width: 8px; height: 8px; border-radius: 50%; background-color: #22c55e; border: 1.5px solid var(--bg-sidebar);"></div>
-                    <span>Limits</span>
+                <button class="nav-item" id="nav-folders-btn" title="Document Folders">
+                    <i class="fa-solid fa-folder"></i>
+                    <span>Folders</span>
                 </button>
-                
-                <!-- Crescent moon dark mode button -->
-                <button class="nav-item" id="sidebar-theme-btn" title="Theme Toggle" style="position: absolute; top: 87%; left: 12px;">
-                    <i class="fa-solid fa-moon"></i>
-                    <span>Theme</span>
+            </nav>
+            <div class="sidebar-footer" style="display: flex; flex-direction: column; gap: 0.75rem; align-items: center; width: 100%;">
+                <button class="nav-item-icon" id="sidebar-storage-btn" title="Storage Usage" style="position: relative; transition: color 0.15s, transform 0.15s;">
+                    <i class="fa-solid fa-cloud"></i>
+                    <div id="sidebar-storage-dot" style="position: absolute; bottom: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background-color: #22c55e; border: 2px solid var(--bg-sidebar);"></div>
                 </button>
+                <button class="nav-item-icon" title="Settings"><i class="fa-solid fa-sliders"></i></button>
             </div>
         </aside>
 
         <!-- MAIN VIEW CONTAINER -->
         <div class="app-view-container">
             
-            <!-- TOP BAR: Navigation and Mode Toggle -->
-            <header class="app-topbar">
-                <div class="topbar-left" style="display: flex; flex-direction: column; gap: 0.1rem; align-items: flex-start; justify-content: center;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #ff6b4a, #d946ef); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 0.85rem;">
-                            <i class="fa-solid fa-droplet"></i>
-                        </div>
-                        <span class="topbar-logo-wordmark" style="color: var(--text-primary); font-family: 'League Spartan', sans-serif; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.01em; text-transform: uppercase;">MemoDrop</span>
+            <!-- TOP BAR: Cosmic Header -->
+            <header class="app-topbar" style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border-light); background: rgba(19, 12, 25, 0.4); backdrop-filter: blur(10px); z-index: 10; height: 70px;">
+                <!-- Top Left: Branding & Tag -->
+                <div class="topbar-left" style="display: flex; align-items: center; gap: 0.65rem;">
+                    <div class="topbar-logo-gradient" style="width: 28px; height: 28px; background: linear-gradient(135deg, #FF9EB5 0%, #E283A7 100%); border-radius: 50%; box-shadow: 0 0 12px rgba(255, 158, 181, 0.5); display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 0.88rem; flex-shrink: 0;">
+                        <i class="fa-solid fa-brain"></i>
                     </div>
-                    <span style="font-size: 0.65rem; color: var(--text-secondary); letter-spacing: 0.05em; font-weight: 600; margin-left: 1.8rem;">YOUR SECOND BRAIN</span>
+                    <div style="display: flex; flex-direction: column; gap: 0.05rem;">
+                        <span style="color: var(--text-primary); font-family: 'League Spartan', sans-serif; font-size: 1.15rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1;">MemoDrop</span>
+                        <span style="color: var(--text-secondary); font-size: 0.62rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.8;">Your Second Brain</span>
+                    </div>
                 </div>
                 
-                <div style="display: flex; gap: 1.25rem; font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.15em; font-family: 'Inter', sans-serif; align-items: center; position: absolute; left: 50%; transform: translateX(-50%);">
-                    <span style="color: var(--text-primary); border-bottom: 2px solid var(--accent-peach); padding-bottom: 0.15rem;">MIND</span>
-                    <span>CAPTURE</span>
-                    <span>ORGANIZE</span>
-                    <span>REMEMBER</span>
+                <!-- Top Center: All-caps tracking nav links -->
+                <div class="topbar-center" style="display: flex; gap: 1.5rem; align-items: center;">
+                    <span style="font-size: 0.68rem; font-weight: 700; letter-spacing: 0.18em; color: var(--text-primary); cursor: pointer; text-transform: uppercase; transition: color 0.15s;" onmouseover="this.style.color='var(--accent-glow)'" onmouseout="this.style.color='var(--text-primary)'">MIND</span>
+                    <span style="font-size: 0.68rem; font-weight: 600; letter-spacing: 0.18em; color: var(--text-secondary); cursor: pointer; text-transform: uppercase; transition: color 0.15s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">CAPTURE</span>
+                    <span style="font-size: 0.68rem; font-weight: 600; letter-spacing: 0.18em; color: var(--text-secondary); cursor: pointer; text-transform: uppercase; transition: color 0.15s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">ORGANIZE</span>
+                    <span style="font-size: 0.68rem; font-weight: 600; letter-spacing: 0.18em; color: var(--text-secondary); cursor: pointer; text-transform: uppercase; transition: color 0.15s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">REMEMBER</span>
                 </div>
                 
-                <div class="topbar-right" style="display: flex; align-items: center; gap: 0.85rem;">
-                    <div style="display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.85rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: #ffffff; cursor: pointer;">
-                        <i class="fa-solid fa-leaf" style="color: #c084fc; font-size: 0.75rem;"></i>
-                        <span>Personal</span>
-                        <i class="fa-solid fa-chevron-down" style="font-size: 0.6rem; color: var(--text-secondary);"></i>
+                <!-- Top Right: Pill button for quick filtering & profile pic -->
+                <div class="topbar-right" style="display: flex; align-items: center; gap: 0.75rem;">
+                    <!-- Segmented Control Group for Personal/Business -->
+                    <div class="segmented-control" id="mode-segmented-control" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: 20px; padding: 0.2rem; display: flex; gap: 0.25rem;">
+                        <!-- Hidden checkbox for state tracking -->
+                        <input type="checkbox" id="mode-toggle-checkbox" style="display: none;">
+                        <button class="segment-btn active" id="segment-btn-personal" type="button" style="padding: 0.35rem 0.8rem; font-size: 0.7rem; font-weight: 700; border-radius: 15px; border: none; background: var(--accent-color); color: #ffffff; cursor: pointer; transition: all 0.2s;">Personal</button>
+                        <button class="segment-btn" id="segment-btn-business" type="button" style="padding: 0.35rem 0.8rem; font-size: 0.7rem; font-weight: 600; border-radius: 15px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.2s;">Business</button>
                     </div>
-                    
-                    <button class="nav-item-icon" title="Calendar" style="color: var(--text-secondary); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px;">
-                        <i class="fa-regular fa-calendar-days"></i>
-                    </button>
-                    
-                    <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; border: 1.5px solid rgba(255,255,255,0.12); flex-shrink: 0;">
-                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100" style="width: 100%; height: 100%; object-fit: cover;">
+
+                    <!-- User badge -->
+                    <div id="header-user-avatar-badge" style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #E283A7 0%, #c084fc 100%); display: flex; align-items: center; justify-content: center; font-size: 0.82rem; font-weight: 700; color: #ffffff; border: 1.5px solid var(--border-dark); box-shadow: 0 0 10px rgba(226, 131, 167, 0.2);">
+                        L
                     </div>
                 </div>
             </header>
 
-            <!-- VIEW H: COSMIC HOME DASHBOARD -->
-            <section class="app-view active" id="view-home">
-                <div class="cosmic-home-wrapper">
-                    <div class="cosmic-dashboard-left">
-                        <div class="cosmic-title-section">
-                            <h1>Drop today, find <span>forever.</span></h1>
-                            <p>Your personal knowledge, beautifully organized by AI.</p>
-                        </div>
-                        
-                        <div class="orbit-system-container">
-                            <div class="central-orb-glow"></div>
-                            <div class="central-orb" id="cosmic-central-orb" title="Click to refresh latest memories"></div>
-                            
-                            <div class="orbit-ring orbit-ring-1"></div>
-                            <div class="orbit-ring orbit-ring-2"></div>
-                            <div class="orbit-ring orbit-ring-3"></div>
-                            
-                            <div id="orbit-nodes-container" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 10;"></div>
-                        </div>
-                        
-                        <div class="cosmic-capture-section">
-                            <div class="cosmic-capture-bar">
-                                <button type="button" class="cosmic-action-btn add" id="cosmic-capture-add" title="Upload document / file"><i class="fa-solid fa-plus"></i></button>
-                                <input type="text" class="cosmic-capture-input" id="cosmic-capture-input" placeholder="Capture a memory...">
-                                <button type="button" class="cosmic-action-btn mic" id="cosmic-capture-voice" title="Speech to text"><i class="fa-solid fa-microphone"></i></button>
-                                <button type="button" class="cosmic-action-btn send" id="cosmic-capture-submit" title="Save memory"><i class="fa-solid fa-arrow-up"></i></button>
-                            </div>
-                            <div class="cosmic-footer-quote">"Small drops. Big clarity."</div>
-                        </div>
-                    </div>
-                    
-                    <div class="cosmic-brain-panel">
-                        <h3>Your Brain</h3>
-                        
-                        <div class="cosmic-stat-item">
-                            <div class="cosmic-stat-icon memories"><i class="fa-solid fa-brain"></i></div>
-                            <div class="cosmic-stat-info">
-                                <span class="cosmic-stat-value" id="stat-memories-count">0</span>
-                                <span class="cosmic-stat-label">Memories</span>
-                            </div>
-                        </div>
-                        
-                        <div class="cosmic-stat-item">
-                            <div class="cosmic-stat-icon docs"><i class="fa-solid fa-file-lines"></i></div>
-                            <div class="cosmic-stat-info">
-                                <span class="cosmic-stat-value" id="stat-docs-count">0</span>
-                                <span class="cosmic-stat-label">Documents</span>
-                            </div>
-                        </div>
-                        
-                        <div class="cosmic-stat-item">
-                            <div class="cosmic-stat-icon voice"><i class="fa-solid fa-microphone-lines"></i></div>
-                            <div class="cosmic-stat-info">
-                                <span class="cosmic-stat-value" id="stat-voice-count">0</span>
-                                <span class="cosmic-stat-label">Voice Notes</span>
-                            </div>
-                        </div>
-                        
-                        <div class="cosmic-stat-item">
-                            <div class="cosmic-stat-icon reminders"><i class="fa-solid fa-bell"></i></div>
-                            <div class="cosmic-stat-info">
-                                <span class="cosmic-stat-value" id="stat-reminders-count">0</span>
-                                <span class="cosmic-stat-label">Reminders</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             <!-- VIEW A: CHAT APPLICATION SCREEN -->
-            <section class="app-view" id="view-chat">
-                <!-- Floating Doodle Accents in Chat Empty Spaces (Never overlapping content) -->
-                <div class="chat-doodles">
-                    <svg class="doodle-svg squiggle" width="50" height="15" viewBox="0 0 50 15" fill="none">
-                        <path d="M4 11C12 3 16 13 24 7C32 1 36 11 44 5" stroke="#111111" stroke-width="2.5" stroke-linecap="round"/>
-                    </svg>
-                    <svg class="doodle-svg star" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M12 2V22M2 12H22M5.5 5.5L18.5 18.5M5.5 18.5L18.5 5.5" stroke="#111111" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </div>
-
-                <!-- Due Reminders Banner Container -->
-                <div id="due-reminders-banner-container" style="display: none; padding: 0.5rem 1.5rem 0.25rem 1.5rem; flex-shrink: 0; z-index: 5;"></div>
-
-                <!-- Chat Messages Scroll Area -->
-                <div class="chat-message-thread" id="chat-messages-thread">
-                    <!-- Rendered dynamically from JS state array -->
-                </div>
-
-                <!-- COMPOSER BAR (Pinned to bottom of Chat Screen) -->
-                <div class="chat-composer-section" style="position: relative;">
-                    <!-- Quick Actions Popover Grid -->
-                    <div class="composer-actions-popover" id="composer-actions-popover" style="display: none; position: absolute; bottom: 85px; left: 1.5rem; right: 1.5rem; background-color: var(--bg-card); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35); padding: 0.85rem; z-index: 10; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; animation: slideUp 0.18s ease-out;">
-                        <button type="button" class="popover-action-btn" data-action="gallery" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
-                            <i class="fa-solid fa-image" style="color: #60a5fa; font-size: 1.2rem;"></i>
-                            <span style="font-size: 0.72rem; font-weight: 500;">Gallery</span>
-                        </button>
-                        <button type="button" class="popover-action-btn" data-action="camera" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
-                            <i class="fa-solid fa-camera" style="color: #f87171; font-size: 1.2rem;"></i>
-                            <span style="font-size: 0.72rem; font-weight: 500;">Camera</span>
-                        </button>
-                        <button type="button" class="popover-action-btn" data-action="document" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
-                            <i class="fa-solid fa-file-pdf" style="color: #fb923c; font-size: 1.2rem;"></i>
-                            <span style="font-size: 0.72rem; font-weight: 500;">Document</span>
-                        </button>
-                        <button type="button" class="popover-action-btn" data-action="contact" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
-                            <i class="fa-solid fa-address-book" style="color: #34d399; font-size: 1.2rem;"></i>
-                            <span style="font-size: 0.72rem; font-weight: 500;">Contact</span>
-                        </button>
-                        <button type="button" class="popover-action-btn" data-action="location" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
-                            <i class="fa-solid fa-map-pin" style="color: #a78bfa; font-size: 1.2rem;"></i>
-                            <span style="font-size: 0.72rem; font-weight: 500;">Location</span>
-                        </button>
-                        <button type="button" class="popover-action-btn" data-action="savelink" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
-                            <i class="fa-solid fa-link" style="color: #22d3ee; font-size: 1.2rem;"></i>
-                            <span style="font-size: 0.72rem; font-weight: 500;">Save Link</span>
-                        </button>
-                        <button type="button" class="popover-action-btn" data-action="reminder" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
-                            <i class="fa-solid fa-calendar-check" style="color: #fbbf24; font-size: 1.2rem;"></i>
-                            <span style="font-size: 0.72rem; font-weight: 500;">Reminder</span>
-                        </button>
-                        <button type="button" class="popover-action-btn" data-action="business_quote" id="action-business-quote-btn" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
-                            <i class="fa-solid fa-file-invoice-dollar" style="color: #f472b6; font-size: 1.2rem;"></i>
-                            <span style="font-size: 0.72rem; font-weight: 500;">Biz Quote</span>
-                        </button>
-                    </div>
-
-                    <!-- Collapsible Processing Explainer -->
-                    <div class="explainer-panel-wrapper">
-                        <button class="explainer-toggle-btn" id="explainer-toggle-btn">
-                            <span>How MemoDrop organizes this</span>
-                            <i class="fa-solid fa-chevron-up toggle-icon"></i>
-                        </button>
+            <section class="app-view active" id="view-chat" style="padding: 0; display: flex; flex-direction: column; overflow: hidden; height: calc(100% - 70px);">
+                
+                <div class="chat-viewport-split" style="display: flex; width: 100%; height: 100%; overflow: hidden; position: relative;">
+                    <!-- Left Chat & Orbital Dashboard Area -->
+                    <div class="chat-main-area" style="display: flex; flex-direction: column; flex: 1; height: 100%; overflow: hidden; position: relative; padding-bottom: 95px; z-index: 2;">
                         
-                        <div class="explainer-content-box" id="explainer-content-box">
-                            <div class="explainer-steps">
-                                <div class="exp-step">
-                                    <div class="num">1</div>
-                                    <div class="text"><strong>Classify</strong>: Auto-routes message to categories (e.g. quote, complaint, link)</div>
-                                </div>
-                                <div class="exp-step">
-                                    <div class="num">2</div>
-                                    <div class="text"><strong>Tag & Extract</strong>: Pulls prices, contacts, and auto-tags keywords</div>
-                                </div>
-                                <div class="exp-step">
-                                    <div class="num">3</div>
-                                    <div class="text"><strong>Recall</strong>: Matches queries semantically, serving the source in context</div>
-                                </div>
+                        <!-- Due Reminders Banner Container -->
+                        <div id="due-reminders-banner-container" style="display: none; padding: 0.5rem 1.5rem 0.25rem 1.5rem; flex-shrink: 0; z-index: 5;"></div>
+
+                        <!-- Chat Messages Scroll Area -->
+                        <div class="chat-message-thread" id="chat-messages-thread" style="flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; position: relative; z-index: 2;">
+                            <!-- Rendered dynamically from JS state array -->
+                        </div>
+
+                        <!-- COMPOSER BAR (Pinned to bottom of Chat Screen) -->
+                        <div class="chat-composer-section" style="position: absolute; bottom: 1.5rem; left: 1.5rem; right: 1.5rem; z-index: 10; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: auto;">
+                            <!-- Quick Actions Popover Grid -->
+                            <div class="composer-actions-popover" id="composer-actions-popover" style="display: none; position: absolute; bottom: 85px; left: 0; right: 0; background-color: var(--bg-card); border: 1px solid var(--border-light); border-radius: 16px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45); padding: 0.85rem; z-index: 12; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; animation: slideUp 0.18s ease-out; backdrop-filter: blur(12px);">
+                                <button type="button" class="popover-action-btn" data-action="gallery" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                                    <i class="fa-solid fa-image" style="color: #FF9EB5; font-size: 1.2rem;"></i>
+                                    <span style="font-size: 0.72rem; font-weight: 500;">Gallery</span>
+                                </button>
+                                <button type="button" class="popover-action-btn" data-action="camera" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                                    <i class="fa-solid fa-camera" style="color: #FF6B4A; font-size: 1.2rem;"></i>
+                                    <span style="font-size: 0.72rem; font-weight: 500;">Camera</span>
+                                </button>
+                                <button type="button" class="popover-action-btn" data-action="document" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                                    <i class="fa-solid fa-file-pdf" style="color: #fb923c; font-size: 1.2rem;"></i>
+                                    <span style="font-size: 0.72rem; font-weight: 500;">Document</span>
+                                </button>
+                                <button type="button" class="popover-action-btn" data-action="contact" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                                    <i class="fa-solid fa-address-book" style="color: #34d399; font-size: 1.2rem;"></i>
+                                    <span style="font-size: 0.72rem; font-weight: 500;">Contact</span>
+                                </button>
+                                <button type="button" class="popover-action-btn" data-action="location" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                                    <i class="fa-solid fa-map-pin" style="color: #a78bfa; font-size: 1.2rem;"></i>
+                                    <span style="font-size: 0.72rem; font-weight: 500;">Location</span>
+                                </button>
+                                <button type="button" class="popover-action-btn" data-action="savelink" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                                    <i class="fa-solid fa-link" style="color: #22d3ee; font-size: 1.2rem;"></i>
+                                    <span style="font-size: 0.72rem; font-weight: 500;">Save Link</span>
+                                </button>
+                                <button type="button" class="popover-action-btn" data-action="reminder" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                                    <i class="fa-solid fa-calendar-check" style="color: #fbbf24; font-size: 1.2rem;"></i>
+                                    <span style="font-size: 0.72rem; font-weight: 500;">Reminder</span>
+                                </button>
+                                <button type="button" class="popover-action-btn" data-action="business_quote" id="action-business-quote-btn" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding: 0.65rem 0.25rem; background: transparent; border: none; border-radius: 10px; cursor: pointer; color: var(--text-primary); transition: background-color 0.15s;">
+                                    <i class="fa-solid fa-file-invoice-dollar" style="color: #f472b6; font-size: 1.2rem;"></i>
+                                    <span style="font-size: 0.72rem; font-weight: 500;">Biz Quote</span>
+                                </button>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Segmented Control Group for Personal/Business (Relocated) -->
-                    <div style="display: flex; justify-content: center; width: 100%; margin-bottom: 0.5rem; margin-top: 0.15rem;">
-                        <div class="segmented-control" id="mode-segmented-control">
-                            <!-- Hidden checkbox for state tracking -->
-                            <input type="checkbox" id="mode-toggle-checkbox" style="display: none;">
-                            <div class="segmented-slider"></div>
-                            <button class="segment-btn active" id="segment-btn-personal" type="button">Personal</button>
-                            <button class="segment-btn" id="segment-btn-business" type="button">Business</button>
-                        </div>
-                    </div>
-
-                    <!-- Pinned Input Composer -->
-                    <div class="composer-input-bar" style="display: flex; flex-direction: column; padding: 0.75rem 0.9rem; gap: 0.6rem;">
-                        <input type="text" id="chat-input" placeholder="Ask me anything or drop something to save..." autocomplete="off">
-                        <div class="composer-actions-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <div class="composer-left-actions" style="display: flex; gap: 0.65rem; align-items: center; color: var(--text-secondary);">
-                                <button type="button" class="composer-icon-btn" id="composer-plus-btn" title="Quick Actions"><i class="fa-solid fa-plus"></i></button>
-                                <button type="button" class="composer-icon-btn" id="composer-voice-btn" title="Voice note"><i class="fa-solid fa-microphone"></i></button>
+                            <!-- Collapsible Processing Explainer -->
+                            <div class="explainer-panel-wrapper" style="margin-bottom: 0.15rem; background: rgba(24, 15, 34, 0.5); backdrop-filter: blur(8px); border: 1px solid var(--border-light); border-radius: 12px; overflow: hidden; transition: all 0.2s;">
+                                <button type="button" class="explainer-toggle-btn" id="explainer-toggle-btn" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 1rem; border: none; background: transparent; color: var(--text-secondary); font-size: 0.72rem; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; outline: none;">
+                                    <span>How MemoDrop organizes this</span>
+                                    <i class="fa-solid fa-chevron-up toggle-icon" style="transition: transform 0.2s;"></i>
+                                </button>
                                 
-                                <div class="composer-mode-toggle" id="composer-mode-toggle" style="display: flex; align-items: center; gap: 0.35rem; background-color: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 0.25rem 0.55rem; cursor: pointer; user-select: none; transition: all 0.2s;">
-                                    <i class="fa-solid fa-inbox" id="composer-mode-icon" style="color: var(--accent-color); font-size: 0.78rem;"></i>
-                                    <span id="composer-mode-label" style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-primary);">Save Mode</span>
+                                <div class="explainer-content-box" id="explainer-content-box" style="display: none; padding: 0.85rem 1rem; border-top: 1px solid var(--border-light); background: rgba(0,0,0,0.15);">
+                                    <div class="explainer-steps" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                                        <div class="exp-step" style="display: flex; align-items: center; gap: 0.65rem; font-size: 0.76rem; color: var(--text-secondary);">
+                                            <div class="num" style="width: 18px; height: 18px; border-radius: 50%; background: var(--accent-color); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; flex-shrink: 0;">1</div>
+                                            <div class="text"><strong>Classify</strong>: Auto-routes message to categories (e.g. quote, complaint, link)</div>
+                                        </div>
+                                        <div class="exp-step" style="display: flex; align-items: center; gap: 0.65rem; font-size: 0.76rem; color: var(--text-secondary);">
+                                            <div class="num" style="width: 18px; height: 18px; border-radius: 50%; background: var(--accent-color); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; flex-shrink: 0;">2</div>
+                                            <div class="text"><strong>Tag & Extract</strong>: Pulls prices, contacts, and auto-tags keywords</div>
+                                        </div>
+                                        <div class="exp-step" style="display: flex; align-items: center; gap: 0.65rem; font-size: 0.76rem; color: var(--text-secondary);">
+                                            <div class="num" style="width: 18px; height: 18px; border-radius: 50%; background: var(--accent-color); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700; flex-shrink: 0;">3</div>
+                                            <div class="text"><strong>Recall</strong>: Matches queries semantically, serving the source in context</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <button id="chat-send-btn" type="button"><i class="fa-solid fa-arrow-up"></i></button>
+
+                            <!-- Pinned Input Composer - Pill-shaped floating bar -->
+                            <div class="composer-input-bar" style="display: flex; flex-direction: row; align-items: center; padding: 0.45rem 0.65rem; background: rgba(24, 15, 34, 0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(226, 131, 167, 0.16); border-radius: 9999px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), 0 0 20px rgba(226, 131, 167, 0.05); gap: 0.5rem; transition: border-color 0.2s, box-shadow 0.2s;" onfocusin="this.style.borderColor='rgba(226, 131, 167, 0.35)'; this.style.boxShadow='0 10px 40px rgba(0, 0, 0, 0.55), 0 0 25px rgba(226, 131, 167, 0.15)';" onfocusout="this.style.borderColor='rgba(226, 131, 167, 0.16)'; this.style.boxShadow='0 10px 40px rgba(0, 0, 0, 0.45), 0 0 20px rgba(226, 131, 167, 0.05)';">
+                                <button type="button" class="composer-icon-btn" id="composer-plus-btn" title="Quick Actions" style="width: 38px; height: 38px; border-radius: 50%; background: rgba(255, 255, 255, 0.03); border: none; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: background-color 0.15s, transform 0.15s; flex-shrink: 0;" onmouseover="this.style.backgroundColor='rgba(255, 255, 255, 0.06)'" onmouseout="this.style.backgroundColor='rgba(255, 255, 255, 0.03)'"><i class="fa-solid fa-plus"></i></button>
+                                
+                                <div class="composer-mode-toggle" id="composer-mode-toggle" style="display: flex; align-items: center; gap: 0.35rem; background-color: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 15px; padding: 0.35rem 0.65rem; cursor: pointer; user-select: none; transition: all 0.2s; flex-shrink: 0;">
+                                    <i class="fa-solid fa-inbox" id="composer-mode-icon" style="color: var(--accent-color); font-size: 0.78rem;"></i>
+                                    <span id="composer-mode-label" style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-primary);">Save</span>
+                                </div>
+
+                                <input type="text" id="chat-input" placeholder="Capture a memory..." autocomplete="off" style="flex: 1; background: transparent; border: none; outline: none; color: #ffffff; font-size: 0.88rem; padding: 0.5rem 0.25rem; font-family: var(--font-sans);">
+                                
+                                <button type="button" class="composer-icon-btn" id="composer-voice-btn" title="Voice note" style="width: 38px; height: 38px; border-radius: 50%; background: transparent; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: color 0.15s; flex-shrink: 0;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='var(--text-secondary)'"><i class="fa-solid fa-microphone"></i></button>
+                                <button id="chat-send-btn" type="button" style="width: 38px; height: 38px; border-radius: 50%; background: var(--accent-color); border: none; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: transform 0.15s, background-color 0.15s; flex-shrink: 0;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';"><i class="fa-solid fa-arrow-up"></i></button>
+                            </div>
+                        </div>
+                        
+                        <!-- Landscape overlapping vector waves at the bottom of the viewport -->
+                        <div class="wave-footer" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 160px; pointer-events: none; overflow: hidden; z-index: 1;">
+                            <svg viewBox="0 0 1440 320" preserveAspectRatio="none" style="position: absolute; bottom: 0; width: 100%; height: 100%;">
+                                <path d="M0,192C288,224,576,160,864,192C1152,224,1440,256,1440,256L1440,320L0,320Z" fill="url(#wave-gradient-1)" opacity="0.4" style="animation: waveSlow 20s infinite alternate linear;"></path>
+                                <path d="M0,224C288,160,576,224,864,192C1152,160,1440,224,1440,224L1440,320L0,320Z" fill="url(#wave-gradient-2)" opacity="0.6" style="animation: waveSlow 15s infinite alternate ease-in-out;"></path>
+                                <path d="M0,256C288,288,576,224,864,256C1152,288,1440,224,1440,224L1440,320L0,320Z" fill="url(#wave-gradient-3)" opacity="0.85" style="animation: waveSlow 12s infinite alternate ease-in-out;"></path>
+                                <defs>
+                                    <linearGradient id="wave-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#130C19" stop-opacity="0"></stop>
+                                        <stop offset="100%" stop-color="#FF9EB5" stop-opacity="0.2"></stop>
+                                    </linearGradient>
+                                    <linearGradient id="wave-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#130C19" stop-opacity="0"></stop>
+                                        <stop offset="100%" stop-color="#E283A7" stop-opacity="0.25"></stop>
+                                    </linearGradient>
+                                    <linearGradient id="wave-gradient-3" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#180F22" stop-opacity="1"></stop>
+                                        <stop offset="100%" stop-color="#2D153B" stop-opacity="1"></stop>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
                         </div>
                     </div>
+
+                    <!-- Right Side "Your Brain" Stats Panel -->
+                    <aside class="brain-stats-panel" style="width: 250px; border-left: 1px solid var(--border-light); background: rgba(19, 12, 25, 0.45); backdrop-filter: blur(12px); display: flex; flex-direction: column; padding: 2rem 1.25rem; gap: 1.5rem; z-index: 2; flex-shrink: 0;">
+                        <h3 style="font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-primary);">Your Brain</h3>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 1.15rem;">
+                            <!-- Memories -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <i class="fa-solid fa-brain" style="color: var(--accent-color); font-size: 0.95rem; width: 16px;"></i>
+                                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);">Memories</span>
+                                </div>
+                                <strong id="stats-count-memories" style="font-size: 0.88rem; color: var(--text-primary);">0</strong>
+                            </div>
+
+                            <!-- Documents -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <i class="fa-solid fa-file-lines" style="color: #60a5fa; font-size: 0.95rem; width: 16px;"></i>
+                                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);">Documents</span>
+                                </div>
+                                <strong id="stats-count-documents" style="font-size: 0.88rem; color: var(--text-primary);">0</strong>
+                            </div>
+
+                            <!-- Voice Notes -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.03);">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <i class="fa-solid fa-microphone" style="color: #fbbf24; font-size: 0.95rem; width: 16px;"></i>
+                                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);">Voice Notes</span>
+                                </div>
+                                <strong id="stats-count-voice" style="font-size: 0.88rem; color: var(--text-primary);">0</strong>
+                            </div>
+
+                            <!-- Reminders -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 0.75rem;">
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <i class="fa-solid fa-calendar-check" style="color: #34d399; font-size: 0.95rem; width: 16px;"></i>
+                                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary);">Reminders</span>
+                                </div>
+                                <strong id="stats-count-reminders" style="font-size: 0.88rem; color: var(--text-primary);">0</strong>
+                            </div>
+                        </div>
+                        
+                        <!-- AI Status Sparkler bottom helper -->
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: auto; padding: 0.65rem 0.75rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); border-radius: 12px; font-size: 0.72rem; color: var(--text-secondary); line-height: 1.35;">
+                            <i class="fa-solid fa-wand-magic-sparkles" style="color: #FF9EB5; animation: pulseGlow 1.5s infinite alternate ease-in-out;"></i>
+                            <span>AI is organizing as you drop...</span>
+                        </div>
+                    </aside>
                 </div>
             </section>
 
@@ -874,6 +842,6 @@
     </div>
 
     <!-- App JavaScript Logic -->
-    <script src="app.js?v=2.2.0"></script>
+    <script src="app.js?v=2.1.3"></script>
 </body>
 </html>
