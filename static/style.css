@@ -3,38 +3,33 @@
    ========================================================================== */
 
 :root {
-    /* Color Palette - Cosmic Cyber-Minimalism */
-    --bg-main: #130C19;       /* Deep space base */
-    --bg-sidebar: #0f0814;    /* Ultra-dark spine base */
-    --bg-card: rgba(24, 15, 34, 0.45); /* Glassmorphic deep purple */
-    --border-light: rgba(226, 131, 167, 0.08); /* Low-opacity magenta/coral border */
-    --border-dark: rgba(226, 131, 167, 0.18); /* Active elements border */
+    /* Color Palette */
+    --bg-main: #111318;       /* Deep charcoal-navy base */
+    --bg-sidebar: #0b0c10;    /* One step darker sidebar */
+    --bg-card: #1A1D24;       /* Slightly lighter panel/card background */
+    --border-light: rgba(255, 255, 255, 0.08); /* Low-opacity border */
+    --border-dark: rgba(255, 255, 255, 0.12); /* Low-opacity border for active items */
     
     /* Text Colors */
-    --text-primary: #EAE5ED;   /* Soft off-white */
-    --text-secondary: #9F8FA6; /* Muted lavender-gray */
-    --text-muted: #6C5B73;     /* Muted dark violet */
+    --text-primary: #F2F1ED;   /* Soft off-white */
+    --text-secondary: #8B8F9C; /* Mid-gray */
+    --text-muted: #575a66;     /* Darker muted gray */
     
-    /* Accents & Glows */
-    --accent-color: #E283A7;   /* Radiant pink */
-    --accent-glow: #FF9EB5;    /* Soft neon coral glow */
-    --accent-yellow: #fbbf24;
-    --accent-mint: #34d399;
-    --accent-lavender: #c084fc;
+    /* Accents */
+    --accent-color: #FF6B4A;   /* Coral/orange warm accent */
+    --accent-yellow: #eab308;
+    --accent-mint: #10b981;
+    --accent-lavender: #6366f1;
     
     /* Bubbles */
-    --bubble-user: #E283A7;    /* Magenta/pink user bubble */
-    --bubble-bot: rgba(24, 15, 34, 0.55);
+    --bubble-user: #FF6B4A;    /* Solid coral accent for user messages */
+    --bubble-bot: #1A1D24;     /* Dark panel background bot bubble */
     
     /* UI Config */
-    --radius-sm: 10px;
-    --radius-md: 20px;
-    --radius-lg: 30px;
-    --shadow-flat: 0 4px 24px rgba(0, 0, 0, 0.3);
-    
-    /* Font Configurations */
-    --font-serif: 'Playfair Display', Georgia, serif;
-    --font-sans: 'Inter', sans-serif;
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --shadow-flat: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 /* Global Reset */
@@ -45,9 +40,9 @@
 }
 
 body {
-    background: linear-gradient(135deg, #130C19 0%, #1A0E27 50%, #100818 100%);
+    background: radial-gradient(circle at top, #1e2129 0%, #0e1014 100%);
     color: var(--text-primary);
-    font-family: var(--font-sans);
+    font-family: 'Inter', sans-serif;
     overflow: hidden;
     height: 100vh;
 }
@@ -2030,141 +2025,3 @@ body {
     border: 1px solid rgba(236, 72, 153, 0.25);
 }
 .folder-card-action.custom { color: #ec4899; }
-
-/* Responsive adjustments for Storage Billing and Security OTP Modals */
-@media (max-width: 480px) {
-    .modal-overlay {
-        padding: 0.75rem !important;
-    }
-    
-    .modal-card {
-        padding: 1.25rem !important;
-        gap: 1rem !important;
-    }
-    
-    /* OTP Modal mobile scaling */
-    .otp-digit-input {
-        width: 36px !important;
-        height: 42px !important;
-        font-size: 1.15rem !important;
-    }
-    
-    #otp-input-container {
-        gap: 0.35rem !important;
-    }
-    
-    /* Billing Modal plan cards wrap */
-    .billing-plan-item {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 0.75rem !important;
-        text-align: left;
-    }
-    
-    .billing-plan-item button {
-        width: 100% !important;
-        padding: 0.55rem 0 !important;
-    }
-}
-
-/* ==========================================================================
-   Cosmic Cyber-Minimalism Animations & Overrides
-   ========================================================================== */
-
-/* Active Sidebar Navigation Item: Encased in a soft, glowing magenta orb */
-.nav-item.active {
-    color: #ffffff !important;
-    background-color: var(--accent-color) !important;
-    border: none;
-    box-shadow: 0 0 16px var(--accent-color), 0 0 4px var(--accent-glow) !important;
-}
-
-/* Slim Curved Orbit Spine connector line passing through nav items */
-.app-sidebar::before {
-    content: '';
-    position: absolute;
-    top: 10%;
-    bottom: 10%;
-    left: 50%;
-    width: 1px;
-    background: linear-gradient(180deg, rgba(226, 131, 167, 0) 0%, rgba(226, 131, 167, 0.2) 20%, rgba(226, 131, 167, 0.2) 80%, rgba(226, 131, 167, 0) 100%);
-    z-index: 1;
-    pointer-events: none;
-}
-
-/* Ensure sidebar items sit above the Spine line */
-.sidebar-logo, .sidebar-nav, .sidebar-footer {
-    position: relative;
-    z-index: 2;
-}
-
-/* Solar System Animations */
-@keyframes pulseGlow {
-    0% {
-        box-shadow: 0 0 25px rgba(255, 158, 181, 0.4), inset -5px -5px 15px rgba(0,0,0,0.4);
-    }
-    100% {
-        box-shadow: 0 0 45px rgba(255, 158, 181, 0.75), inset -10px -10px 20px rgba(0,0,0,0.6);
-    }
-}
-
-@keyframes rotateOrbit {
-    from {
-        transform: rotate(-8deg) rotate(0deg);
-    }
-    to {
-        transform: rotate(-8deg) rotate(360deg);
-    }
-}
-
-@keyframes rotateOrbitCounter {
-    from {
-        transform: rotate(-8deg) rotate(360deg);
-    }
-    to {
-        transform: rotate(-8deg) rotate(0deg);
-    }
-}
-
-/* Gentle floating animation for cards and orbital nodes */
-@keyframes floatGently {
-    0% {
-        margin-top: -6px;
-    }
-    100% {
-        margin-top: 6px;
-    }
-}
-
-.orbital-node {
-    animation: floatGently 6s infinite alternate ease-in-out;
-}
-.orbital-node.ideas {
-    animation-delay: 0s;
-}
-.orbital-node.personal {
-    animation-delay: 1.5s;
-}
-.orbital-node.work {
-    animation-delay: 3s;
-}
-
-@keyframes waveSlow {
-    0% {
-        transform: translateX(-5%);
-    }
-    100% {
-        transform: translateX(5%);
-    }
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}

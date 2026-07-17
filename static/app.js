@@ -265,9 +265,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         const viewer = document.createElement('div');
-        viewer.style = "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 10000; display: flex; align-items: center; justify-content: center;";
+        viewer.style = "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 2rem;";
         viewer.innerHTML = `
-            <div class="modal-card" style="background: #111318; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; width: 100%; max-width: 500px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <div style="background: #111318; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; width: 100%; max-width: 500px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 1.05rem; color: #ffffff; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">${filename}</span>
                     <button style="background: transparent; border: none; color: #8B8F9C; cursor: pointer; font-size: 1.1rem;" onclick="this.closest('.modal-overlay').remove()"><i class="fa-solid fa-xmark"></i></button>
@@ -2563,194 +2563,48 @@ document.addEventListener('DOMContentLoaded', () => {
      * Centralized Chat Renderer
      * Renders chat bubbles from the `chatMessages` array.
      */
-    function updateBrainStats() {
-        const memoriesCount = allMemories.length;
-        
-        // Count documents
-        const docsCount = allMemories.filter(m => m.category === 'document' || m.content.includes('[Document Attachment]')).length;
-        
-        // Count voice notes
-        const voiceCount = allMemories.filter(m => m.category === 'voice_note' || m.content.toLowerCase().includes('voice note') || m.content.includes('[Voice Attachment]')).length;
-        
-        // Count reminders
-        const remindersCount = allMemories.filter(m => m.category === 'task_reminder' || m.content.toLowerCase().includes('reminder') || m.reminder_time).length;
-        
-        // Update DOM elements
-        const memEl = document.getElementById('stats-count-memories');
-        const docEl = document.getElementById('stats-count-documents');
-        const voiceEl = document.getElementById('stats-count-voice');
-        const remEl = document.getElementById('stats-count-reminders');
-        
-        if (memEl) memEl.innerText = memoriesCount;
-        if (docEl) docEl.innerText = docsCount;
-        if (voiceEl) voiceEl.innerText = voiceCount;
-        if (remEl) remEl.innerText = remindersCount;
-    }
-
-    function renderOrbitalDashboard(container) {
-        const cardsContainer = container.querySelector('#orbital-floating-cards');
-        if (!cardsContainer) return;
-        cardsContainer.innerHTML = '';
-        
-        const recentMemories = allMemories.slice(0, 3);
-        const positions = [
-            { x: -130, y: -90, delay: '0s', angle: -6 },
-            { x: 140, y: -50, delay: '1.5s', angle: 8 },
-            { x: 10, y: 110, delay: '3s', angle: -2 }
-        ];
-        
-        recentMemories.forEach((m, idx) => {
-            const pos = positions[idx] || { x: 0, y: 0, delay: '0s', angle: 0 };
-            let snippet = m.content;
-            
-            if (m.content.startsWith('[Document Attachment]') || m.content.startsWith('[Image Attachment]')) {
-                const filenameMatch = m.content.match(/filename:\s*([^|]+)/);
-                snippet = filenameMatch ? `Attachment: ${filenameMatch[1].trim()}` : 'Uploaded document';
-            } else if (snippet.length > 55) {
-                snippet = snippet.substring(0, 52) + '...';
-            }
-            
-            const card = document.createElement('div');
-            card.style = `
-                position: absolute;
-                left: 50%;
-                top: 50%;
-                transform: translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px)) rotate(${pos.angle}deg);
-                width: 140px;
-                background: rgba(24, 15, 34, 0.65);
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                border: 1px solid rgba(226, 131, 167, 0.15);
-                padding: 0.75rem;
-                border-radius: 12px;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.35);
-                pointer-events: auto;
-                cursor: pointer;
-                transition: all 0.25s ease;
-                z-index: 15;
-                animation: floatGently 5s infinite alternate ease-in-out;
-                animation-delay: ${pos.delay};
-            `;
-            
-            card.innerHTML = `
-                <div style="display: flex; flex-direction: column; gap: 0.35rem; pointer-events: none;">
-                    <span style="font-size: 0.62rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">${formatCategoryName(m.category)}</span>
-                    <p style="font-size: 0.74rem; color: var(--text-primary); line-height: 1.35; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-weight: 500;">${snippet}</p>
-                </div>
-            `;
-            
-            // Hover styles
-            card.onmouseover = () => {
-                card.style.transform = `translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px)) rotate(${pos.angle}deg) scale(1.05)`;
-                card.style.boxShadow = `0 12px 30px rgba(226, 131, 167, 0.25), 0 0 15px rgba(226, 131, 167, 0.15)`;
-                card.style.borderColor = 'rgba(226, 131, 167, 0.35)';
-                card.style.background = 'rgba(24, 15, 34, 0.85)';
-            };
-            card.onmouseout = () => {
-                card.style.transform = `translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px)) rotate(${pos.angle}deg) scale(1)`;
-                card.style.boxShadow = '0 8px 24px rgba(0,0,0,0.35)';
-                card.style.borderColor = 'rgba(226, 131, 167, 0.15)';
-                card.style.background = 'rgba(24, 15, 34, 0.65)';
-            };
-            
-            card.onclick = (e) => {
-                e.stopPropagation();
-                if (window.openEditModal) window.openEditModal(m.id);
-            };
-            
-            cardsContainer.appendChild(card);
-        });
-    }
-
     function renderChat() {
         chatMessagesThread.innerHTML = '';
-        
-        // Refresh brain statistics panel
-        updateBrainStats();
         
         if (chatMessages.length === 0) {
             const welcome = document.createElement('div');
             welcome.className = 'welcome-container';
-            welcome.style = "display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; position: relative; overflow: visible; padding: 2rem 0; flex: 1;";
+            welcome.style = "display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin: auto; max-width: 480px; padding: 1.5rem 1rem; gap: 1rem; overflow: visible;";
             welcome.innerHTML = `
-                <!-- Hero Headline -->
-                <div class="hero-headline-container" style="text-align: center; margin-bottom: 2rem; z-index: 10; animation: fadeIn 0.8s ease-out;">
-                    <h1 style="font-family: var(--font-serif); font-size: 2.8rem; font-weight: 400; color: var(--text-primary); line-height: 1.25; margin: 0;">
-                        Drop today, <em style="font-style: italic; font-weight: 400; font-family: var(--font-serif); color: var(--accent-glow);">forever.</em>
-                    </h1>
-                    <p style="font-size: 0.82rem; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.5rem; font-family: var(--font-sans);">Your Second Brain</p>
+                <div class="welcome-logo" style="width: 56px; height: 56px; background-color: #ffffff; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #111318; box-shadow: 0 8px 24px rgba(0,0,0,0.15); flex-shrink: 0;">
+                    <i class="fa-solid fa-brain"></i>
                 </div>
-
-                <!-- Interactive Solar System Viewport -->
-                <div id="mind-map-viewport" style="position: relative; width: 100%; max-width: 600px; height: 350px; display: flex; align-items: center; justify-content: center; margin: 0 auto; overflow: visible; z-index: 5;">
-                    
-                    <!-- Center Node (Planet) -->
-                    <div class="center-brain-node" style="position: absolute; width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #FF9EB5 0%, #E283A7 50%, #803D58 100%); box-shadow: 0 0 40px rgba(255, 158, 181, 0.4), inset -10px -10px 20px rgba(0,0,0,0.5); z-index: 10; display: flex; align-items: center; justify-content: center; cursor: pointer; animation: pulseGlow 4s infinite alternate ease-in-out;">
-                        <i class="fa-solid fa-brain" style="font-size: 2.2rem; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.3);"></i>
+                <div class="welcome-greeting" style="font-size: 0.88rem; font-weight: 600; color: #a5b4fc; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.5rem;">Hi, Leharin</div>
+                <h1 class="welcome-headline" style="font-family: 'League Spartan', sans-serif; font-size: 2.2rem; font-weight: 800; color: #ffffff; line-height: 1.1; margin: 0;">What are you dropping in today?</h1>
+                <p class="welcome-subtext" style="font-size: 0.88rem; color: #8B8F9C; line-height: 1.5; margin: 0;">MemoDrop auto-categorizes your unorganized text, links, and documents instantly.</p>
+                
+                <!-- Quick Demo Scenario Pills -->
+                <div class="welcome-scenarios" style="display: flex; flex-direction: column; gap: 0.6rem; width: 100%; margin-top: 1.25rem; align-items: center;">
+                    <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Try these examples:</span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 440px;">
+                        <button type="button" class="pill-btn" data-text="Fabric Supplier offered cotton roll at Rs 120 per meter. Contact: 9876543210." style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 0.45rem 0.85rem; font-size: 0.75rem; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: inherit; font-weight: 500;">
+                            <i class="fa-solid fa-cloud-arrow-up" style="color: #6ee7b7; margin-right: 0.35rem;"></i> Save cotton roll quote
+                        </button>
+                        <button type="button" class="pill-btn" data-text="Verify Ramesh Fabrics quote" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 0.45rem 0.85rem; font-size: 0.75rem; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: inherit; font-weight: 500;">
+                            <i class="fa-solid fa-magnifying-glass" style="color: #60a5fa; margin-right: 0.35rem;"></i> Verify Ramesh Fabrics quote
+                        </button>
+                        <button type="button" class="pill-btn" data-text="what was the cotton roll quote?" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 0.45rem 0.85rem; font-size: 0.75rem; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: inherit; font-weight: 500;">
+                            <i class="fa-solid fa-magnifying-glass" style="color: #fde047; margin-right: 0.35rem;"></i> Find cotton roll quote
+                        </button>
                     </div>
-
-                    <!-- Orbit Ring 1 (Inner) -->
-                    <div class="orbit-ring" style="position: absolute; width: 220px; height: 120px; border: 1px solid rgba(226, 131, 167, 0.15); border-radius: 50%; z-index: 3; pointer-events: none; transform: rotate(-8deg); animation: rotateOrbit 30s infinite linear;"></div>
-
-                    <!-- Orbit Ring 2 (Middle) -->
-                    <div class="orbit-ring" style="position: absolute; width: 380px; height: 200px; border: 1px solid rgba(226, 131, 167, 0.12); border-radius: 50%; z-index: 2; pointer-events: none; transform: rotate(-8deg); animation: rotateOrbitCounter 45s infinite linear;"></div>
-
-                    <!-- Orbit Ring 3 (Outer) -->
-                    <div class="orbit-ring" style="position: absolute; width: 520px; height: 280px; border: 1px solid rgba(226, 131, 167, 0.08); border-radius: 50%; z-index: 1; pointer-events: none; transform: rotate(-8deg); animation: rotateOrbit 60s infinite linear;"></div>
-
-                    <!-- Category Badges -->
-                    <div class="orbital-node ideas" data-category="idea" style="position: absolute; z-index: 12; transform: translate(-100px, -45px);">
-                        <div class="orbit-pill" style="display: flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.95rem; border-radius: 20px; background: rgba(24, 15, 34, 0.75); border: 1px solid rgba(251,191,36,0.3); box-shadow: 0 0 15px rgba(251,191,36,0.15); cursor: pointer; transition: all 0.2s;">
-                            <span style="width: 6px; height: 6px; border-radius: 50%; background: #fbbf24;"></span>
-                            <span style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-primary);">Ideas</span>
-                        </div>
-                    </div>
-
-                    <div class="orbital-node personal" data-category="personal" style="position: absolute; z-index: 12; transform: translate(120px, 30px);">
-                        <div class="orbit-pill" style="display: flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.95rem; border-radius: 20px; background: rgba(24, 15, 34, 0.75); border: 1px solid rgba(192,132,252,0.3); box-shadow: 0 0 15px rgba(192,132,252,0.15); cursor: pointer; transition: all 0.2s;">
-                            <span style="width: 6px; height: 6px; border-radius: 50%; background: #c084fc;"></span>
-                            <span style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-primary);">Personal</span>
-                        </div>
-                    </div>
-
-                    <div class="orbital-node work" data-category="work" style="position: absolute; z-index: 12; transform: translate(-170px, 80px);">
-                        <div class="orbit-pill" style="display: flex; align-items: center; gap: 0.35rem; padding: 0.45rem 0.95rem; border-radius: 20px; background: rgba(24, 15, 34, 0.75); border: 1px solid rgba(52,211,153,0.3); box-shadow: 0 0 15px rgba(52,211,153,0.15); cursor: pointer; transition: all 0.2s;">
-                            <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399;"></span>
-                            <span style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-primary);">Work</span>
-                        </div>
-                    </div>
-
-                    <!-- Floating Cards Container -->
-                    <div id="orbital-floating-cards" style="position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 6;"></div>
                 </div>
             `;
             chatMessagesThread.appendChild(welcome);
 
-            // Bind click events to category badges in orbital map
-            welcome.querySelectorAll('.orbital-node').forEach(node => {
-                node.style.cursor = 'pointer';
-                node.addEventListener('click', () => {
-                    const cat = node.getAttribute('data-category');
-                    if (cat === 'idea') {
-                        switchView('vault');
-                        const ideaTab = document.querySelector(`.tab-btn[data-category="idea"]`);
-                        if (ideaTab) ideaTab.click();
-                    } else if (cat === 'work') {
-                        // Switch to business mode
-                        const bizBtn = document.getElementById('vault-segment-btn-business');
-                        if (bizBtn) bizBtn.click();
-                        switchView('vault');
-                    } else if (cat === 'personal') {
-                        // Switch to personal mode
-                        const persBtn = document.getElementById('vault-segment-btn-personal');
-                        if (persBtn) persBtn.click();
-                        switchView('vault');
-                    }
+            // Bind click events to dynamically generated scenario buttons
+            welcome.querySelectorAll('.pill-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const text = btn.getAttribute('data-text');
+                    chatInput.value = text;
+                    chatInput.dispatchEvent(new Event('input'));
+                    handleSendMessage();
                 });
             });
-
-            // Dynamically populate floating cards
-            renderOrbitalDashboard(welcome);
             return;
         }
         
