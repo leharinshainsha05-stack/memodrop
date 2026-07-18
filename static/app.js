@@ -230,61 +230,146 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Expose document viewer helper
-    window.openTextDocumentViewer = async function(filename, data) {
-        let isGovernmentDoc = false;
-        
-        // 1. Search in allMemories list
-        const matchingMemory = allMemories.find(m => {
-            return m.content.includes(filename) || (data && data.length > 50 && m.content.includes(data.substring(0, 50)));
-        });
-        
-        if (matchingMemory && matchingMemory.document_folder && matchingMemory.document_folder.toLowerCase() === 'government & legal') {
-            isGovernmentDoc = true;
-        }
-        
-        // 2. Fallback to active folder level check
-        if (!isGovernmentDoc) {
-            const activeFolderContainer = document.getElementById('folder-contents-level');
-            const activeFolderNameElement = document.getElementById('active-folder-name');
-            const activeFolderName = activeFolderNameElement ? activeFolderNameElement.innerText.trim() : '';
-            if (activeFolderContainer && activeFolderContainer.style.display === 'block' && activeFolderName.toLowerCase() === 'government & legal') {
-                isGovernmentDoc = true;
-            }
-        }
-        
-        if (isGovernmentDoc) {
-            const verified = await requestOtpVerification();
-            if (!verified) {
-                return;
+    window.openTextDocumentViewer = function(filename, data, folderName = null) {
+        if (!folderName) {
+            // Find dynamically
+            const matchingMemory = allMemories.find(m => {
+                return m.content.includes(filename) || (data && data.length > 50 && m.content.includes(data.substring(0, 50)));
+            });
+            if (matchingMemory && matchingMemory.document_folder) {
+                folderName = matchingMemory.document_folder;
+            } else {
+                const activeFolderContainer = document.getElementById('folder-contents-level');
+                const activeFolderNameElement = document.getElementById('active-folder-name');
+                const activeFolderName = activeFolderNameElement ? activeFolderNameElement.innerText.trim() : '';
+                if (activeFolderContainer && activeFolderContainer.style.display === 'block') {
+                    folderName = activeFolderName;
+                }
             }
         }
 
-        let displayContent = data;
-        if (data.startsWith('data:')) {
-            displayContent = `[Base64 Attachment Data file: ${filename}]\n\nClick the link to download or open locally in your browser.`;
+        if (folderName === 'Government & Legal') {
+            const phone = currentUserPhone || 'anonymous';
+            if (phone === 'anonymous') {
+                showCustomAlert("Authentication Required", "Please log in with a phone number to view secure government documents.");
+                return;
+            }
+            
+            // 1. Request OTP from backend
+            fetch('/api/documents/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: phone, filename: filename })
+            })
+            .then(res => res.json())
+            .then(resData => {
+                if (resData.status === 'success') {
+                    // Show OTP verification modal
+                    const otpModal = document.createElement('div');
+                    otpModal.style = "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 10001; display: flex; align-items: center; justify-content: center; padding: 2rem;";
+                    otpModal.classList.add('modal-overlay');
+                    
+                    const demoOtpNotice = resData.demo_otp ? `<div style="margin-top: 0.5rem; padding: 0.5rem; background: rgba(255, 107, 74, 0.1); border: 1px dashed #FF6B4A; border-radius: 8px; color: #FF6B4A; font-weight: 700; font-size: 0.85rem; text-align: center;">Demo OTP Code: ${resData.demo_otp}</div>` : '';
+                    
+                    otpModal.innerHTML = `
+                        <div style="background: #111318; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; width: 100%; max-width: 400px; padding: 2rem; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+                            <div style="text-align: center;">
+                                <div style="width: 54px; height: 54px; background: rgba(255,255,255,0.03); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; font-size: 1.8rem; color: #FF6B4A; border: 1px solid rgba(255,255,255,0.08);">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </div>
+                                <h3 style="font-family: 'League Spartan', sans-serif; font-size: 1.3rem; font-weight: 800; color: #ffffff; margin: 0 0 0.5rem 0; text-transform: uppercase;">Secure Document Access</h3>
+                                <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0; line-height: 1.45;">Enter the verification code sent to <strong>${phone}</strong> to view this document.</p>
+                                ${demoOtpNotice}
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+                                <input id="doc-otp-input" type="text" placeholder="Enter OTP Code" style="width: 100%; padding: 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); color: #fff; font-size: 0.95rem; outline: none; text-align: center; letter-spacing: 0.1em;">
+                                <span id="doc-otp-error" style="color: #f87171; font-size: 0.72rem; text-align: center; display: none;">Invalid OTP, please try again.</span>
+                            </div>
+                            <div style="display: flex; gap: 0.75rem; width: 100%;">
+                                <button id="doc-otp-cancel" style="flex: 1; padding: 0.75rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); background: transparent; color: #8B8F9C; font-family: 'League Spartan', sans-serif; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; cursor: pointer;">Cancel</button>
+                                <button id="doc-otp-verify" style="flex: 1; padding: 0.75rem; border-radius: 10px; border: none; background: #FF6B4A; color: #ffffff; font-family: 'League Spartan', sans-serif; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; cursor: pointer;">Verify & Open</button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(otpModal);
+                    
+                    const otpInput = otpModal.querySelector('#doc-otp-input');
+                    const verifyBtn = otpModal.querySelector('#doc-otp-verify');
+                    const cancelBtn = otpModal.querySelector('#doc-otp-cancel');
+                    const errorSpan = otpModal.querySelector('#doc-otp-error');
+                    
+                    otpInput.focus();
+                    cancelBtn.onclick = () => otpModal.remove();
+                    
+                    function submitVerification() {
+                        const enteredOtp = otpInput.value.trim();
+                        if (!enteredOtp) return;
+                        
+                        fetch('/api/documents/verify-otp', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ phone: phone, otp: enteredOtp })
+                        })
+                        .then(vRes => {
+                            if (vRes.ok) {
+                                otpModal.remove();
+                                showDocumentContent(filename, data);
+                            } else {
+                                errorSpan.style.display = 'block';
+                                otpInput.value = '';
+                                otpInput.focus();
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error verifying OTP:', err);
+                            showCustomAlert("Error", "An error occurred during verification.");
+                        });
+                    }
+                    
+                    verifyBtn.onclick = submitVerification;
+                    otpInput.onkeydown = (e) => {
+                        if (e.key === 'Enter') submitVerification();
+                    };
+                } else {
+                    showCustomAlert("Error", `Failed to send OTP: ${resData.message || 'Unknown error'}`);
+                }
+            })
+            .catch(err => {
+                console.error('Error sending OTP:', err);
+                showCustomAlert("Error", "Failed to initialize secure viewing process.");
+            });
+        } else {
+            showDocumentContent(filename, data);
         }
         
-        const viewer = document.createElement('div');
-        viewer.style = "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 2rem;";
-        viewer.innerHTML = `
-            <div style="background: #111318; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; width: 100%; max-width: 500px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 1.05rem; color: #ffffff; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">${filename}</span>
-                    <button style="background: transparent; border: none; color: #8B8F9C; cursor: pointer; font-size: 1.1rem;" onclick="this.closest('.modal-overlay').remove()"><i class="fa-solid fa-xmark"></i></button>
+        function showDocumentContent(filename, data) {
+            let displayContent = data;
+            if (data.startsWith('data:')) {
+                displayContent = `[Base64 Attachment Data file: ${filename}]\n\nClick the link to download or open locally in your browser.`;
+            }
+            
+            const viewer = document.createElement('div');
+            viewer.style = "position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 2rem;";
+            viewer.innerHTML = `
+                <div style="background: #111318; border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; width: 100%; max-width: 500px; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-family: 'League Spartan', sans-serif; font-weight: 800; font-size: 1.05rem; color: #ffffff; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">${filename}</span>
+                        <button style="background: transparent; border: none; color: #8B8F9C; cursor: pointer; font-size: 1.1rem;" onclick="this.closest('.modal-overlay').remove()"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 1rem; font-family: monospace; font-size: 0.82rem; color: #8B8F9C; min-height: 120px; max-height: 250px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;">
+                        ${displayContent}
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+                        <a href="${data}" download="${filename}" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; background: #FF6B4A; border: none; color: #ffffff; text-decoration: none; display: inline-block; text-align: center;">Download File</a>
+                    </div>
                 </div>
-                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 1rem; font-family: monospace; font-size: 0.82rem; color: #8B8F9C; min-height: 120px; max-height: 250px; overflow-y: auto; white-space: pre-wrap; word-break: break-all;">
-                    ${displayContent}
-                </div>
-                <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
-                    <a href="${data}" download="${filename}" style="padding: 0.5rem 1.1rem; font-family: 'League Spartan', sans-serif; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; background: #FF6B4A; border: none; color: #ffffff; text-decoration: none; display: inline-block; text-align: center;">Download File</a>
-                </div>
-            </div>
-        `;
-        viewer.className = "modal-overlay";
-        viewer.onclick = (e) => {
-            if (e.target === viewer) viewer.remove();
-        };
-        document.body.appendChild(viewer);
+            `;
+            viewer.className = "modal-overlay";
+            viewer.onclick = (e) => {
+                if (e.target === viewer) viewer.remove();
+            };
+            document.body.appendChild(viewer);
+        }
     };
 
     // --- Custom Confirmation & Alert Modals ---

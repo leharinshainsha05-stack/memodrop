@@ -531,6 +531,55 @@ async def api_verify_otp(request: Request):
         return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
 
 
+@app.post("/api/documents/send-otp")
+async def api_send_doc_otp(request: Request):
+    import random
+    try:
+        data = await request.json()
+        phone = data.get("phone", "").strip()
+        filename = data.get("filename", "").strip()
+        if not phone:
+            return JSONResponse({"status": "error", "message": "Phone number is required."}, status_code=400)
+            
+        otp_code = f"{random.randint(100000, 999999)}"
+        active_otps[phone] = otp_code
+        
+        print("\n" + "=" * 55)
+        print(f"  [SECURITY VERIFICATION] OTP for {phone} viewing {filename}: {otp_code}  ")
+        print("=" * 55 + "\n", flush=True)
+        
+        return JSONResponse({
+            "status": "success",
+            "message": f"Verification code sent to {phone}",
+            "demo_otp": otp_code
+        })
+    except Exception as e:
+        print(f"[API] Error sending document OTP: {e}")
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
+@app.post("/api/documents/verify-otp")
+async def api_verify_doc_otp(request: Request):
+    try:
+        data = await request.json()
+        phone = data.get("phone", "").strip()
+        code = data.get("otp", "").strip() or data.get("code", "").strip()
+        
+        if not phone or not code:
+            return JSONResponse({"status": "error", "message": "Phone and code/otp are required."}, status_code=400)
+            
+        saved_code = active_otps.get(phone)
+        if saved_code and saved_code == code:
+            active_otps.pop(phone, None)
+            return JSONResponse({"status": "success"})
+        else:
+            return JSONResponse({"status": "error", "message": "Invalid or expired verification code."}, status_code=400)
+    except Exception as e:
+        print(f"[API] Error verifying document OTP: {e}")
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
+
 @app.get("/share-target")
 async def api_share_target(title: str = "", text: str = "", url: str = ""):
     from fastapi.responses import RedirectResponse
