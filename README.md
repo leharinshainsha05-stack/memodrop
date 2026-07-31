@@ -98,9 +98,9 @@ memodrop/
 - A Supabase project (or SQLite fallback works out of the box)
 - An LLM API key (Groq)
 
-## Team
 
-Built by **Leharin Nisha**, **Geethalakshmi**, and **Shimharshini** — AMET University, Chennai.
+
+Built by **Leharin Nisha**— AMET University, Chennai.
 
 ## Roadmap
 
