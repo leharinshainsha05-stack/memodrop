@@ -4,7 +4,6 @@
 
 MemoDrop is an AI-powered memory assistant. You dump anything — shopping links, documents, supplier quotes, customer complaints, random thoughts, reminders, voice notes — with zero structure required, and later ask for it back in plain language. MemoDrop classifies, tags, and stores everything automatically, so nothing you save is ever truly lost.
 
-Built for **iQOO City Battle 2026 Hackathon**.
 
 🔗 **Live Demo:** [MemoDrop - AI Memory Assistant](https://memodrop.onrender.com/)
 
